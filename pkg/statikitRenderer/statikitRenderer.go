@@ -1,8 +1,8 @@
 package statikitRenderer
 
 import (
-	"errors"
 	"fmt"
+	"io/fs"
 	"os"
 	"path/filepath"
 )
@@ -12,84 +12,49 @@ type Args struct {
 	OutDir string
 }
 
-func render(c chan<- []error, f *os.File, fPath string) {
-	fmt.Println(fPath)
-	c <- nil
+func render(fIn, fOut *os.File) error {
+	fmt.Println(fIn.Name())
+	return nil
 }
 
-func recurseRender(c chan<- []error, in []os.DirEntry, parentInPath string, parentOutPath string) {
-	var errs []error
-	var dirsToSearch []os.DirEntry
-	renderDone := make(chan []error)
+func initHandleEntry(baseOutPath string) fs.WalkDirFunc {
+	return func(inPath string, entry os.DirEntry, err error) error {
+		if err != nil {
+			return err
+		}
 
-	childCount := 0
+		outPath := filepath.Join(baseOutPath, inPath)
 
-	for _, e := range in {
-		if e.IsDir() {
-			dirsToSearch = append(dirsToSearch, e)
-		} else {
-			// Render e
-			fInPath := parentInPath + filepath.FromSlash("/") + e.Name()
-			fmt.Printf("Rendering file: %v\n", e.Name())
-			if f, err := os.Open(fInPath); err != nil {
-				errs = append(errs, err)
-			} else {
-				fOutPath := parentOutPath + filepath.FromSlash("/") + e.Name()
-				go render(renderDone, f, fOutPath)
-				childCount += 1
+		// Handle the current entry
+		// If it's a directory, create that directory in outPath
+		if entry.IsDir() {
+			return os.Mkdir(outPath, os.ModeDir)
+		}
+		// Otherwise it is a file,
+		// If the input file is a .gohtml file, render it
+		if filepath.Ext(inPath) == ".gohtml" {
+			fIn, err := os.Open(inPath)
+			if err != nil {
+				return err
 			}
+			fOut, err := os.Create(outPath)
+			if err != nil {
+				return err
+			}
+			return render(fIn, fOut)
+		} else {
+			// Otherwise, hard link the file from inPath to outPath
+			return os.Link(inPath, outPath)
 		}
 	}
-
-	for _, d := range dirsToSearch {
-		dInPath := parentInPath + filepath.FromSlash("/") + d.Name()
-		if e, err := os.ReadDir(dInPath); err != nil {
-			errs = append(errs, err)
-		} else {
-			dOutPath := parentOutPath + filepath.FromSlash("/") + d.Name()
-			if err := os.Mkdir(dOutPath, os.ModeDir); err != nil {
-				errs = append(errs, err)
-			} else {
-				go recurseRender(renderDone, e, dInPath, dOutPath)
-				childCount += 1
-			}
-		}
-	}
-
-	for i := 0; i < childCount; i += 1 {
-		childErrs := <-renderDone
-		errs = append(errs, childErrs...)
-	}
-
-	c <- errs
 }
 
-func Render(a Args) []error {
-	var errs []error
-
-	in, err := os.ReadDir(a.InDir)
-	if err != nil {
-		errs = append(errs, err)
-		return errs
-	}
-
+func Render(a Args) error {
 	if err := os.RemoveAll(a.OutDir); err != nil {
-		errs = append(errs, err)
-		return errs
+		return err
 	}
 
-	if err := os.Mkdir(a.OutDir, os.ModeDir); err != nil {
-		if !errors.Is(err, os.ErrExist) {
-			errs = append(errs, err)
-			return errs
-		}
-	}
+	handleEntry := initHandleEntry(a.OutDir)
+	return filepath.WalkDir(a.InDir, handleEntry)
 
-	renderDone := make(chan []error)
-
-	go recurseRender(renderDone, in, a.InDir, a.OutDir)
-
-	errs = append(errs, <-renderDone...)
-
-	return errs
 }
