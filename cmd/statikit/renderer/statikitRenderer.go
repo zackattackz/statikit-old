@@ -1,4 +1,4 @@
-package statikitRenderer
+package renderer
 
 import (
 	"fmt"
