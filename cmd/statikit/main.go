@@ -49,7 +49,7 @@ func main() {
 		flag.StringVar(&outDir, outFlag, defaultOut, descOut)
 		flag.Parse()
 		rendererArgs := statikitRenderer.Args{InDir: inDir, OutDir: outDir}
-		for _, err := range statikitRenderer.Render(rendererArgs) {
+		if err := statikitRenderer.Render(rendererArgs); err != nil {
 			fmt.Fprintf(os.Stderr, "ERROR: %v\n", err)
 		}
 
