@@ -7,7 +7,7 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/zackattackz/azure_static_site_kit/cmd/statikit/renderer"
+	"github.com/zackattackz/azure_static_site_kit/pkg/statikit"
 )
 
 const (
@@ -66,17 +66,24 @@ func main() {
 	flag.BoolVar(&force, forceFlag, defaultForce, descForce)
 	flag.Parse()
 
-	// If valid mode, erase out dir
-	// Else print usage string and exit
+	// If invalid mode print usage string and exit
 	switch mode {
 	case render, preview, publish:
-		if !force {
-			if err := warnErase(outDir); err != nil {
-				logErrAndExit(err, 1)
-			}
-		}
+		break
 	default:
 		logErrAndExit(fmt.Errorf(usageString), 1)
+	}
+
+	// If no force flag, ensure user wants to erase.
+	if !force {
+		if err := warnErase(outDir); err != nil {
+			logErrAndExit(err, 1)
+		}
+	}
+
+	// If we make it here, erase outdir
+	if err := os.RemoveAll(outDir); err != nil {
+		logErrAndExit(err, 1)
 	}
 
 	// Go into mode specific handlers
@@ -84,8 +91,8 @@ func main() {
 
 	case render:
 
-		rendererArgs := renderer.Args{InDir: inDir, OutDir: outDir}
-		if err := renderer.Render(rendererArgs); err != nil {
+		rendererArgs := statikit.RendererArgs{InDir: inDir, OutDir: outDir}
+		if err := statikit.Render(rendererArgs); err != nil {
 			logErrAndExit(err, 1)
 		}
 
