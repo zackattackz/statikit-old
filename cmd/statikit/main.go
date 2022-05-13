@@ -20,22 +20,25 @@ const (
 	publish = "publish"
 
 	// flag names
-	inFlag    = "d"
-	outFlag   = "o"
-	forceFlag = "f"
+	inFlag            = "d"
+	outFlag           = "o"
+	forceFlag         = "f"
+	rendererCountFlag = "renderer-count"
 
 	// default flag values
-	defaultIn    = "."
-	defaultForce = false
+	defaultIn            = "."
+	defaultForce         = false
+	defaultRendererCount = 20
 
 	// flag descriptions
-	descIn    = "unrendered input directory"
-	descOut   = "rendered output directory"
-	descForce = "force output directory removal"
+	descIn            = "unrendered input directory"
+	descOut           = "rendered output directory"
+	descForce         = "force output directory removal"
+	descRendererCount = "how many renderer goroutines to be made"
 )
 
 func logErrAndExit(err error, code int) {
-	fmt.Fprintf(os.Stderr, "ERROR: %v\n", err)
+	fmt.Fprintf(os.Stderr, "error: %v\n", err)
 	os.Exit(code)
 }
 
@@ -60,10 +63,12 @@ func main() {
 	var inDir string
 	var outDir string
 	var force bool
+	var rendererCount uint
 	defaultOut := filepath.Join(os.TempDir(), "statikitRendered")
 	flag.StringVar(&inDir, inFlag, defaultIn, descIn)
 	flag.StringVar(&outDir, outFlag, defaultOut, descOut)
 	flag.BoolVar(&force, forceFlag, defaultForce, descForce)
+	flag.UintVar(&rendererCount, rendererCountFlag, defaultRendererCount, descRendererCount)
 	flag.Parse()
 
 	// If invalid mode print usage string and exit
@@ -91,7 +96,7 @@ func main() {
 
 	case render:
 
-		rendererArgs := statikit.RendererArgs{InDir: inDir, OutDir: outDir}
+		rendererArgs := statikit.RendererArgs{InDir: inDir, OutDir: outDir, RendererCount: rendererCount, Data: struct{ Test string }{Test: "person"}}
 		if err := statikit.Render(rendererArgs); err != nil {
 			logErrAndExit(err, 1)
 		}
