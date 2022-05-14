@@ -4,34 +4,55 @@
 package statikit
 
 import (
-	"errors"
+	"fmt"
 	"html/template"
+	"io"
 	"os"
 	"path/filepath"
 	"sync"
 )
 
+// Arguments to statikit.Render
 type RendererArgs struct {
-	InDir         string
-	OutDir        string
-	RendererCount uint
-	Data          any
+	InDir         string //Root input directory
+	OutDir        string // Root output directory
+	RendererCount uint   // # of renderer goroutines
+	Data          any    // Data passed to template.Execute
 }
 
-type rendererInput struct {
-	fOut *os.File
-	t    *template.Template
-	data any
+// Combination of input/output paths
+type inOutPath struct {
+	in  string
+	out string
 }
 
-// renderer reads from inputs and sends result of rendering
-// to c until either inputs or done is closed.
-func renderer(done <-chan struct{}, inputs <-chan rendererInput, c chan error) {
-	for input := range inputs {
-		err := input.t.Execute(input.fOut, input.data)
-		input.fOut.Close()
+// Render the template at `p.in` to `p.out`, providing `data`
+func render(p inOutPath, data any) error {
+	fOut, err := os.Create(p.out)
+	if err != nil {
+		return err
+	}
+	defer fOut.Close()
+
+	b, err := os.ReadFile(p.in)
+	if err != nil {
+		return err
+	}
+
+	t, err := template.New(p.out).Parse(string(b))
+	if err != nil {
+		return err
+	}
+
+	return t.Execute(fOut, data)
+}
+
+// renderer reads in/out paths from `paths` and sends result of rendering
+// to `c` until either `ps` or `done` is closed.
+func renderer(done <-chan struct{}, paths <-chan inOutPath, data any, c chan error) {
+	for p := range paths {
 		select {
-		case c <- err:
+		case c <- render(p, data):
 		case <-done:
 			return
 		}
@@ -39,97 +60,80 @@ func renderer(done <-chan struct{}, inputs <-chan rendererInput, c chan error) {
 }
 
 // walkFiles starts a goroutine to walk the directory tree at root and send the
-// path of each regular file on the string channel.  It sends the result of the
+// in/out path of each "*.gohtml" file on `paths`.  It sends the result of the
 // walk on the error channel.  If done is closed, walkFiles abandons its work.
-func walkFiles(done <-chan struct{}, data any, baseIn, baseOut string) (<-chan rendererInput, <-chan error) {
-	toRender := make(chan rendererInput)
+// It copies directories and other regular files from in to out as it walks.
+func walkFiles(done <-chan struct{}, data any, baseIn, baseOut string) (<-chan inOutPath, <-chan error) {
+	paths := make(chan inOutPath)
 	errc := make(chan error, 1)
 	go func() {
 		// Close the paths channel after Walk returns.
-		defer close(toRender)
+		defer close(paths)
 		// No select needed for this send, since errc is buffered.
 		errc <- filepath.Walk(baseIn, func(path string, info os.FileInfo, err error) error {
-
 			if err != nil {
 				return err
 			}
 
-			fullOut := filepath.Join(baseOut, path)
+			// Determine the full in/out paths for our file at `path`
 			fullIn := filepath.Join(baseIn, path)
+			fullOut := filepath.Join(baseOut, path)
 
 			// If it's a directory, create that directory in baseOut/prefix
 			if info.IsDir() {
 				return os.Mkdir(fullOut, os.ModeDir)
 			}
 
+			// If not a directory or regular, error out
+			if !info.Mode().IsRegular() {
+				return fmt.Errorf("encountered irregular file: %s", fullIn)
+			}
+
+			// Otherwise, check if the file ends in ".gohtml"
 			if filepath.Ext(path) != ".gohtml" {
-				// If regular file, hard link the file from fullIn to fullOut
-				return os.Link(fullIn, fullOut)
+
+				// If it doesn't, copy file contents from `fullIn` to `fullOut`
+				fIn, err := os.Open(fullIn)
+				if err != nil {
+					return err
+				}
+				defer fIn.Close()
+
+				fOut, err := os.Create(fullOut)
+				if err != nil {
+					return err
+				}
+				defer fOut.Close()
+
+				_, err = io.Copy(fOut, fIn)
+				return err
+
 			} else {
-				// If .gohtml, create a template from file at `path` and send to `toRender`
+				// If it does, send in/out path to `paths`
 
-				// Open `path`
-				fIn, err := os.Open(path)
-				if err != nil {
-					return err
-				}
+				// Replace the ".gohtml" extension with ".html"
+				fullOut = fullOut[:len(fullOut)-len(filepath.Ext(fullOut))] + ".html"
 
-				// Open fullOut, except replace the ".gohtml" extension with ".html"
-				fullOutNoExt := fullOut[:len(fullOut)-len(filepath.Ext(fullOut))]
-				fOut, err := os.Create(fullOutNoExt + ".html")
-				if err != nil {
-					return err
-				}
-
-				// Now read fIn into a byte buffer `b`
-				fInStat, err := fIn.Stat()
-				if err != nil {
-					fOut.Close()
-					return err
-				}
-				s := fInStat.Size()
-				b := make([]byte, s)
-				for s > 0 {
-					n, err := fIn.Read(b)
-					if err != nil {
-						fOut.Close()
-						fIn.Close()
-						return err
-					}
-					s -= int64(n)
-				}
-
-				fIn.Close()
-
-				// Create a template by parsing `b`
-				t, err := template.New(fInStat.Name()).Parse(string(b))
-				if err != nil {
-					return err
-				}
-
-				// Send `fOut`, `t`, and `data` on the `toRender` channel
+				// Send on paths or error out if `done` is closed
 				select {
-				case toRender <- rendererInput{fOut: fOut, t: t, data: data}:
+				case paths <- inOutPath{in: fullIn, out: fullOut}:
+					return nil
 				case <-done:
-					// (return early if done)
-					fOut.Close()
-					return errors.New("walk canceled")
+					return fmt.Errorf("walk canceled")
 				}
-
-				return nil
 			}
 		})
 	}()
-	return toRender, errc
+	return paths, errc
 }
 
-// Orchestrates a pipeline that walks a.InDir,
-// duplicating the all directories and files into a.OutDir.
+// Orchestrates a pipeline that walks `a.InDir`,
+// duplicating the all directories and files into `a.OutDir`.
 // Except for any encountered "*.gohtml" files,
 // which will be rendered as html.
 func Render(a RendererArgs) error {
 	if a.RendererCount < 1 {
-		return errors.New("a.RendererCount must be >= 1")
+		return fmt.Errorf("a.RendererCount must be >= 1")
 	}
 
 	// Render closes the done channel when it returns; it may do so before
@@ -145,7 +149,7 @@ func Render(a RendererArgs) error {
 	wg.Add(int(a.RendererCount))
 	for i := 0; i < int(a.RendererCount); i++ {
 		go func() {
-			renderer(done, paths, c)
+			renderer(done, paths, a.Data, c)
 			wg.Done()
 		}()
 	}
