@@ -79,7 +79,6 @@ func TestGetDataFilePath(t *testing.T) {
 		t.Fatalf("error on os.Getwd(): %s", err)
 	}
 	testcasesPath := filepath.Join(wd, "testcases", "datafile")
-	fmt.Println(testcasesPath)
 	in := filepath.Join(testcasesPath, "in")
 
 	expectedResults := map[string]expectedResults{

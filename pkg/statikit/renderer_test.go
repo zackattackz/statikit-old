@@ -80,7 +80,6 @@ func TestRender(t *testing.T) {
 		t.Fatalf("error on os.Getwd(): %s", err)
 	}
 	testcasesPath := filepath.Join(wd, "testcases", "renderer")
-	fmt.Println(testcasesPath)
 	in := filepath.Join(testcasesPath, "in")
 	out := filepath.Join(testcasesPath, "out")
 	expected := filepath.Join(testcasesPath, "expected")
