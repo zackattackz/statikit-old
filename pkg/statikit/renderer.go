@@ -97,6 +97,14 @@ func walkFiles(done <-chan struct{}, data any, baseIn, baseOut string) (<-chan i
 				return fmt.Errorf("encountered irregular file: %s", fullIn)
 			}
 
+			// If the file is the "renderData" file, skip it
+			matched, err := filepath.Match("renderData.*", info.Name())
+			if matched {
+				return nil
+			} else if err != nil {
+				return err
+			}
+
 			// Otherwise, check if the file ends in ".gohtml"
 			if filepath.Ext(fullIn) != ".gohtml" {
 

@@ -94,17 +94,32 @@ func TestRender(t *testing.T) {
 		if !e.IsDir() {
 			t.Fatalf("entry is not a directory: %s", e.Name())
 		}
+
 		in := filepath.Join(in, e.Name())
+		dataFilePath := filepath.Join(in, "renderData.toml")
 		out := filepath.Join(out, e.Name())
 		expected := filepath.Join(expected, e.Name())
 
 		os.RemoveAll(out)
-		// TODO: Implement Data reader
-		args := RendererArgs{InDir: in, OutDir: out, RendererCount: 20, Data: struct{ TestThree string }{TestThree: "world"}}
-		err := Render(args)
+
+		dataFile, err := os.Open(dataFilePath)
+		if err != nil {
+			t.Fatalf("couldn't open data file: %s", dataFilePath)
+		}
+		defer dataFile.Close()
+
+		data, err := ParseData(ParseDataArgs{r: dataFile, format: TomlFormat})
+		if err != nil {
+			t.Fatalf("couldn't parse data file: %s", dataFilePath)
+		}
+
+		args := RendererArgs{InDir: in, OutDir: out, RendererCount: 20, Data: data}
+
+		err = Render(args)
 		if err != nil {
 			t.Fatalf("error on Render(%v): %s", args, err)
 		}
+
 		areEqual, err := dirsEqual(out, expected)
 		if err != nil {
 			t.Fatalf("error on dirsEqual(\"%s\", \"%s\"): %s", out, expected, err)
