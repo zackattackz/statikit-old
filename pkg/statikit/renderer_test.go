@@ -11,6 +11,7 @@ import (
 )
 
 func dirsEqual(a, b string) (bool, error) {
+	var item1, item2 string
 	notEqualErr := errors.New("contents not equal")
 
 	err := filepath.WalkDir(a, func(path string, d fs.DirEntry, err error) error {
@@ -34,6 +35,8 @@ func dirsEqual(a, b string) (bool, error) {
 			if fBStat.IsDir() {
 				return nil
 			} else {
+				item1 = fullA
+				item2 = fullB
 				return notEqualErr
 			}
 		}
@@ -55,12 +58,14 @@ func dirsEqual(a, b string) (bool, error) {
 		if bytes.Equal(fullAContents, fullBContents) {
 			return nil
 		} else {
+			item1 = fullA
+			item2 = fullB
 			return notEqualErr
 		}
 
 	})
 	if err == notEqualErr {
-		return false, nil
+		return false, fmt.Errorf("%s, %s: %w", item1, item2, err)
 	} else if err != nil {
 		return false, err
 	} else {
