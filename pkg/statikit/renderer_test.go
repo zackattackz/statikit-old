@@ -89,6 +89,13 @@ func TestRender(t *testing.T) {
 		t.Fatalf("error on ReadDir(\"%s\"): %s", in, err)
 	}
 
+	os.RemoveAll(out)
+
+	err = os.Mkdir(out, os.ModeDir)
+	if err != nil {
+		t.Fatalf("error on mkdir: %v", err)
+	}
+
 	for _, e := range d {
 		if !e.IsDir() {
 			t.Fatalf("entry is not a directory: %s", e.Name())
@@ -97,8 +104,6 @@ func TestRender(t *testing.T) {
 		in := filepath.Join(in, e.Name())
 		out := filepath.Join(out, e.Name())
 		expected := filepath.Join(expected, e.Name())
-
-		os.RemoveAll(out)
 
 		err := os.Mkdir(out, os.ModeDir)
 		if err != nil {
