@@ -15,9 +15,9 @@ type runTestArgs struct {
 	expected map[string]interface{}
 }
 
-func runTest(a runTestArgs, format ParseDataFormat) error {
+func runTest(a runTestArgs, format ConfigFileFormat) error {
 	r := strings.NewReader(a.input)
-	actual, err := ParseDataFile(ParseDataArgs{Reader: r, Format: format})
+	actual, err := ParseConfigFile(ParseConfigArgs{Reader: r, Format: format})
 	if err != nil {
 		return err
 	}
@@ -28,7 +28,7 @@ func runTest(a runTestArgs, format ParseDataFormat) error {
 	return nil
 }
 
-func TestParseData(t *testing.T) {
+func TestParseConfig(t *testing.T) {
 	tomlTests := []runTestArgs{
 		{
 			input:    `Test = "hello"`,
@@ -68,39 +68,39 @@ func TestParseData(t *testing.T) {
 
 type expectedResults struct {
 	p   string
-	f   ParseDataFormat
+	f   ConfigFileFormat
 	err error
 }
 
-func TestGetDataFilePath(t *testing.T) {
+func TestGetConfigFilePath(t *testing.T) {
 
 	wd, err := os.Getwd()
 	if err != nil {
 		t.Fatalf("error on os.Getwd(): %s", err)
 	}
-	testcasesPath := filepath.Join(wd, "testcases", "datafile")
+	testcasesPath := filepath.Join(wd, "testcases", "config")
 	in := filepath.Join(testcasesPath, "in")
 
 	expectedResults := map[string]expectedResults{
 		"one": {
-			p:   filepath.Join(in, "one", DataFileName+".json"),
+			p:   filepath.Join(in, "one", ConfigFileName+".json"),
 			f:   JsonFormat,
 			err: nil,
 		},
 		"two": {
-			p:   filepath.Join(in, "two", DataFileName+".toml"),
+			p:   filepath.Join(in, "two", ConfigFileName+".toml"),
 			f:   TomlFormat,
 			err: nil,
 		},
 		"three": {
 			p:   "",
 			f:   0,
-			err: ErrDataFileNotExist,
+			err: ErrConfigFileNotExist,
 		},
 		"four": {
 			p:   "",
 			f:   0,
-			err: ErrDataFileNotExist,
+			err: ErrConfigFileNotExist,
 		},
 		"five": {
 			p:   "",
@@ -121,7 +121,7 @@ func TestGetDataFilePath(t *testing.T) {
 
 		in := filepath.Join(in, e.Name())
 
-		p, f, err := GetDataFilePath(in)
+		p, f, err := GetConfigFilePath(in)
 		expected := expectedResults[e.Name()]
 		if err != nil {
 			if !errors.Is(expected.err, err) {

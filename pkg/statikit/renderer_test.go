@@ -100,23 +100,23 @@ func TestRender(t *testing.T) {
 
 		os.RemoveAll(out)
 
-		dataFilePath, format, err := GetDataFilePath(in)
+		configPath, configFormat, err := GetConfigFilePath(in)
 		if err != nil {
-			t.Fatalf("error on GetDataFilePath: %v", err)
+			t.Fatalf("error on GetConfigFilePath: %v", err)
 		}
 
-		dataFile, err := os.Open(dataFilePath)
+		configFile, err := os.Open(configPath)
 		if err != nil {
-			t.Fatalf("couldn't open data file: %s", dataFilePath)
+			t.Fatalf("couldn't open config file: %s", configPath)
 		}
-		defer dataFile.Close()
+		defer configFile.Close()
 
-		data, err := ParseDataFile(ParseDataArgs{Reader: dataFile, Format: format})
+		config, err := ParseConfigFile(ParseConfigArgs{Reader: configFile, Format: configFormat})
 		if err != nil {
-			t.Fatalf("couldn't parse data file: %s", dataFilePath)
+			t.Fatalf("couldn't parse config file: %s", configPath)
 		}
 
-		args := RendererArgs{InDir: in, OutDir: out, RendererCount: 20, Data: data}
+		args := RendererArgs{InDir: in, OutDir: out, RendererCount: 20, Data: config}
 
 		err = Render(args)
 		if err != nil {

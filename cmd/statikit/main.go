@@ -91,23 +91,23 @@ func main() {
 		logErrAndExit(err, 1)
 	}
 
-	dataFilePath, dataFileFormat, err := statikit.GetDataFilePath(inDir)
+	configPath, configFormat, err := statikit.GetConfigFilePath(inDir)
 	if err != nil {
 		logErrAndExit(err, 1)
 	}
-	dataFile, err := os.Open(dataFilePath)
+	configFile, err := os.Open(configPath)
 	if err != nil {
 		logErrAndExit(err, 1)
 	}
-	defer dataFile.Close()
+	defer configFile.Close()
 
-	data, err := statikit.ParseDataFile(statikit.ParseDataArgs{Reader: dataFile, Format: dataFileFormat})
+	config, err := statikit.ParseConfigFile(statikit.ParseConfigArgs{Reader: configFile, Format: configFormat})
 	if err != nil {
 		logErrAndExit(err, 1)
 	}
 
 	// Call the renderer
-	rendererArgs := statikit.RendererArgs{InDir: inDir, OutDir: outDir, RendererCount: rendererCount, Data: data}
+	rendererArgs := statikit.RendererArgs{InDir: inDir, OutDir: outDir, RendererCount: rendererCount, Data: config}
 	if err := statikit.Render(rendererArgs); err != nil {
 		logErrAndExit(err, 1)
 	}

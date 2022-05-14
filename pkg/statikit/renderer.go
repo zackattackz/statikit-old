@@ -97,8 +97,8 @@ func walkFiles(done <-chan struct{}, data any, baseIn, baseOut string) (<-chan i
 				return fmt.Errorf("encountered irregular file: %s", fullIn)
 			}
 
-			// If the file is the "renderData" file, skip it
-			matched, err := filepath.Match("renderData.*", info.Name())
+			// If the file is the config file, skip it
+			matched, err := filepath.Match(ConfigFileName+".*", info.Name())
 			if matched {
 				return nil
 			} else if err != nil {

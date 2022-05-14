@@ -12,16 +12,16 @@ import (
 	"github.com/BurntSushi/toml"
 )
 
-type ParseDataFormat uint
+type ConfigFileFormat uint
 
 const (
-	JsonFormat ParseDataFormat = iota
+	JsonFormat ConfigFileFormat = iota
 	TomlFormat
 
-	DataFileName = "renderData"
+	ConfigFileName = "statikitConfig"
 )
 
-var extToFormat = map[string]ParseDataFormat{
+var extToFormat = map[string]ConfigFileFormat{
 	".json": JsonFormat,
 	".toml": TomlFormat,
 }
@@ -31,7 +31,7 @@ type MoreThanOneError struct {
 }
 
 func (e MoreThanOneError) Error() string {
-	return fmt.Sprintf("too many data files: %v", e.amount)
+	return fmt.Sprintf("too many config files: %v", e.amount)
 }
 
 func (e MoreThanOneError) Is(target error) bool {
@@ -47,31 +47,31 @@ func moreThanOneError(amount uint) MoreThanOneError {
 }
 
 var (
-	ErrDataFileNotExist error = errors.New(fs.ErrNotExist.Error())
+	ErrConfigFileNotExist error = errors.New(fs.ErrNotExist.Error())
 )
 
-type ParseDataArgs struct {
+type ParseConfigArgs struct {
 	Reader io.Reader
-	Format ParseDataFormat
+	Format ConfigFileFormat
 }
 
 /*
-Searches for a single valid data file in path `root`
+Searches for a single valid config file in path `root`
 
 Returns:
-	(string, ParseDataFormat, nil) The full path to the single data file and its format
-	(_, _, MoreThanOneErr) If more than one data file exists
-	(_, _, ErrDataFileNotExist) If no data files exist
+	(string, ConfigFileFormat, nil) The full path to the single config file and its format
+	(_, _, MoreThanOneErr) If more than one config file exists
+	(_, _, ErrConfigFileNotExist) If no config files exist
 	(_, _, error) Any generic error from os calls
 */
-func GetDataFilePath(root string) (resPath string, f ParseDataFormat, resErr error) {
+func GetConfigFilePath(root string) (resPath string, f ConfigFileFormat, resErr error) {
 	// For each valid extention, ext,
 	// If the file at path "root/p.ext" exists and is regular,
 	// return the path and it's associated format
 	// if no valid file is found return fs.ErrNotExist
 	count := uint(0)
 	for ext := range extToFormat {
-		p := filepath.Join(root, DataFileName+ext)
+		p := filepath.Join(root, ConfigFileName+ext)
 		s, err := os.Stat(p)
 		if errors.Is(err, fs.ErrNotExist) {
 			continue
@@ -87,14 +87,14 @@ func GetDataFilePath(root string) (resPath string, f ParseDataFormat, resErr err
 		}
 	}
 	if count == 0 {
-		resErr = ErrDataFileNotExist
+		resErr = ErrConfigFileNotExist
 	} else if count > 1 {
 		resErr = moreThanOneError(count)
 	}
 	return
 }
 
-func ParseDataFile(a ParseDataArgs) (any, error) {
+func ParseConfigFile(a ParseConfigArgs) (any, error) {
 	result := make(map[string]interface{})
 	switch a.Format {
 	case JsonFormat:
