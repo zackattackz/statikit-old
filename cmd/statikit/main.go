@@ -82,6 +82,14 @@ func main() {
 	inDir = filepath.Clean(inDir)
 	outDir = filepath.Clean(outDir)
 
+	s, err := os.Stat(inDir)
+	if err != nil {
+		logErrAndExit(fmt.Errorf("couldn't read %s", inDir), 1)
+	}
+	if !s.IsDir() {
+		logErrAndExit(fmt.Errorf("%s is not a directory", inDir), 1)
+	}
+
 	// If no force flag, ensure user wants to erase.
 	if !force {
 		if err := warnErase(outDir); err != nil {
