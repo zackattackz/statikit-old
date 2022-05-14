@@ -56,7 +56,7 @@ func render(p inOutPath, data any) error {
 }
 
 // renderer reads in/out paths from `paths` and sends result of rendering
-// to `c` until either `ps` or `done` is closed.
+// to `c` until either `paths` or `done` is closed.
 func renderer(done <-chan struct{}, paths <-chan inOutPath, data any, c chan error) {
 	for p := range paths {
 		select {
