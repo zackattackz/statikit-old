@@ -41,6 +41,7 @@ func dirsEqual(a, b string) (bool, error) {
 			}
 		}
 
+		// If file isn't regular, just skip it
 		if !d.Type().IsRegular() {
 			return nil
 		}
@@ -98,7 +99,8 @@ func TestRender(t *testing.T) {
 		expected := filepath.Join(expected, e.Name())
 
 		os.RemoveAll(out)
-		args := RendererArgs{InDir: in, OutDir: out, RendererCount: 20, Data: nil}
+		// TODO: Implement Data reader
+		args := RendererArgs{InDir: in, OutDir: out, RendererCount: 20, Data: struct{ TestThree string }{TestThree: "world"}}
 		err := Render(args)
 		if err != nil {
 			t.Fatalf("error on Render(%v): %s", args, err)
@@ -110,6 +112,5 @@ func TestRender(t *testing.T) {
 		if !areEqual {
 			t.Fatalf("expected dir %s did not equal actual dir %s", expected, out)
 		}
-		os.RemoveAll(out)
 	}
 }
