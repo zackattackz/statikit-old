@@ -105,11 +105,6 @@ func TestRender(t *testing.T) {
 		out := filepath.Join(out, e.Name())
 		expected := filepath.Join(expected, e.Name())
 
-		err := os.Mkdir(out, 0755)
-		if err != nil {
-			t.Fatalf("error on mkdir: %v", err)
-		}
-
 		configPath, configFormat, err := GetConfigFilePath(in)
 		if err != nil {
 			t.Fatalf("error on GetConfigFilePath: %v", err)

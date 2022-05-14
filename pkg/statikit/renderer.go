@@ -87,10 +87,6 @@ func walkFiles(done <-chan struct{}, baseIn, baseOut string) (<-chan inOutPath, 
 			fullIn := filepath.Join(baseIn, path)
 			fullOut := filepath.Join(baseOut, path)
 
-			if fullOut == baseOut {
-				return nil
-			}
-
 			// If it's a directory, create that directory in baseOut/prefix
 			if info.IsDir() {
 				return os.Mkdir(fullOut, 0755)

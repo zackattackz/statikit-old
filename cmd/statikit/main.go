@@ -94,12 +94,6 @@ func main() {
 		logErrAndExit(err, 1)
 	}
 
-	// Create outdir
-	err := os.Mkdir(outDir, 0755)
-	if err != nil {
-		logErrAndExit(err, 1)
-	}
-
 	configPath, configFormat, err := statikit.GetConfigFilePath(inDir)
 	if err != nil {
 		logErrAndExit(err, 1)
