@@ -9,6 +9,7 @@ import (
 	"io"
 	"os"
 	"path/filepath"
+	"strings"
 	"sync"
 )
 
@@ -24,6 +25,13 @@ type RendererArgs struct {
 type inOutPath struct {
 	in  string
 	out string
+}
+
+func subtractPaths(parent, child string) string {
+	parentList := strings.Split(parent, string(filepath.Separator))
+	childList := strings.Split(child, string(filepath.Separator))
+
+	return filepath.Join(childList[len(parentList):]...)
 }
 
 // Render the template at `p.in` to `p.out`, providing `data`
@@ -74,7 +82,7 @@ func walkFiles(done <-chan struct{}, data any, baseIn, baseOut string) (<-chan i
 			if err != nil {
 				return err
 			}
-
+			path = subtractPaths(baseIn, path)
 			// Determine the full in/out paths for our file at `path`
 			fullIn := filepath.Join(baseIn, path)
 			fullOut := filepath.Join(baseOut, path)
@@ -90,7 +98,7 @@ func walkFiles(done <-chan struct{}, data any, baseIn, baseOut string) (<-chan i
 			}
 
 			// Otherwise, check if the file ends in ".gohtml"
-			if filepath.Ext(path) != ".gohtml" {
+			if filepath.Ext(fullIn) != ".gohtml" {
 
 				// If it doesn't, copy file contents from `fullIn` to `fullOut`
 				fIn, err := os.Open(fullIn)
