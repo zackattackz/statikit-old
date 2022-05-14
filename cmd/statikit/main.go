@@ -92,7 +92,7 @@ func main() {
 	}
 
 	// Create outdir
-	err := os.Mkdir(outDir, os.ModeDir)
+	err := os.Mkdir(outDir, 0755)
 	if err != nil {
 		logErrAndExit(err, 1)
 	}

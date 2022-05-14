@@ -93,7 +93,7 @@ func walkFiles(done <-chan struct{}, baseIn, baseOut string) (<-chan inOutPath, 
 
 			// If it's a directory, create that directory in baseOut/prefix
 			if info.IsDir() {
-				return os.Mkdir(fullOut, os.ModeDir)
+				return os.Mkdir(fullOut, 0755)
 			}
 
 			// If not a directory or regular, error out

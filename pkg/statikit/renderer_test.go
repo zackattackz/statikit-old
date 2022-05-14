@@ -91,7 +91,7 @@ func TestRender(t *testing.T) {
 
 	os.RemoveAll(out)
 
-	err = os.Mkdir(out, os.ModeDir)
+	err = os.Mkdir(out, 0755)
 	if err != nil {
 		t.Fatalf("error on mkdir: %v", err)
 	}
@@ -105,7 +105,7 @@ func TestRender(t *testing.T) {
 		out := filepath.Join(out, e.Name())
 		expected := filepath.Join(expected, e.Name())
 
-		err := os.Mkdir(out, os.ModeDir)
+		err := os.Mkdir(out, 0755)
 		if err != nil {
 			t.Fatalf("error on mkdir: %v", err)
 		}
