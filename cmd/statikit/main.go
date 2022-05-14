@@ -79,6 +79,9 @@ func main() {
 		logErrAndExit(fmt.Errorf(usageString), 1)
 	}
 
+	inDir = filepath.Clean(inDir)
+	outDir = filepath.Clean(outDir)
+
 	// If no force flag, ensure user wants to erase.
 	if !force {
 		if err := warnErase(outDir); err != nil {
