@@ -100,6 +100,11 @@ func TestRender(t *testing.T) {
 
 		os.RemoveAll(out)
 
+		err := os.Mkdir(out, os.ModeDir)
+		if err != nil {
+			t.Fatalf("error on mkdir: %v", err)
+		}
+
 		configPath, configFormat, err := GetConfigFilePath(in)
 		if err != nil {
 			t.Fatalf("error on GetConfigFilePath: %v", err)
