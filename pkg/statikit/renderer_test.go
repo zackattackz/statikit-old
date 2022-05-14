@@ -96,11 +96,15 @@ func TestRender(t *testing.T) {
 		}
 
 		in := filepath.Join(in, e.Name())
-		dataFilePath := filepath.Join(in, "renderData.toml")
 		out := filepath.Join(out, e.Name())
 		expected := filepath.Join(expected, e.Name())
 
 		os.RemoveAll(out)
+
+		dataFilePath, format, err := GetDataFilePath(in)
+		if err != nil {
+			t.Fatalf("error on GetDataFilePath: %v", err)
+		}
 
 		dataFile, err := os.Open(dataFilePath)
 		if err != nil {
@@ -108,7 +112,7 @@ func TestRender(t *testing.T) {
 		}
 		defer dataFile.Close()
 
-		data, err := ParseData(ParseDataArgs{r: dataFile, format: TomlFormat})
+		data, err := ParseDataFile(ParseDataArgs{Reader: dataFile, Format: format})
 		if err != nil {
 			t.Fatalf("couldn't parse data file: %s", dataFilePath)
 		}

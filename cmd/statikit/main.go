@@ -91,15 +91,31 @@ func main() {
 		logErrAndExit(err, 1)
 	}
 
+	dataFilePath, dataFileFormat, err := statikit.GetDataFilePath(inDir)
+	if err != nil {
+		logErrAndExit(err, 1)
+	}
+	dataFile, err := os.Open(dataFilePath)
+	if err != nil {
+		logErrAndExit(err, 1)
+	}
+	defer dataFile.Close()
+
+	data, err := statikit.ParseDataFile(statikit.ParseDataArgs{Reader: dataFile, Format: dataFileFormat})
+	if err != nil {
+		logErrAndExit(err, 1)
+	}
+
+	// Call the renderer
+	rendererArgs := statikit.RendererArgs{InDir: inDir, OutDir: outDir, RendererCount: rendererCount, Data: data}
+	if err := statikit.Render(rendererArgs); err != nil {
+		logErrAndExit(err, 1)
+	}
+
 	// Go into mode specific handlers
 	switch mode {
 
 	case render:
-
-		rendererArgs := statikit.RendererArgs{InDir: inDir, OutDir: outDir, RendererCount: rendererCount, Data: struct{ Test string }{Test: "person"}}
-		if err := statikit.Render(rendererArgs); err != nil {
-			logErrAndExit(err, 1)
-		}
 
 	case preview:
 

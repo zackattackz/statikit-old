@@ -51,8 +51,8 @@ var (
 )
 
 type ParseDataArgs struct {
-	r      io.Reader
-	format ParseDataFormat
+	Reader io.Reader
+	Format ParseDataFormat
 }
 
 /*
@@ -96,13 +96,13 @@ func GetDataFilePath(root string) (resPath string, f ParseDataFormat, resErr err
 
 func ParseDataFile(a ParseDataArgs) (any, error) {
 	result := make(map[string]interface{})
-	switch a.format {
+	switch a.Format {
 	case JsonFormat:
-		d := json.NewDecoder(a.r)
+		d := json.NewDecoder(a.Reader)
 		d.Decode(&result)
 		return result, nil
 	case TomlFormat:
-		d := toml.NewDecoder(a.r)
+		d := toml.NewDecoder(a.Reader)
 		_, err := d.Decode(&result)
 		return result, err
 	default:

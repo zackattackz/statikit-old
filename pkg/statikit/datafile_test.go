@@ -17,7 +17,7 @@ type runTestArgs struct {
 
 func runTest(a runTestArgs, format ParseDataFormat) error {
 	r := strings.NewReader(a.input)
-	actual, err := ParseDataFile(ParseDataArgs{r: r, format: format})
+	actual, err := ParseDataFile(ParseDataArgs{Reader: r, Format: format})
 	if err != nil {
 		return err
 	}
