@@ -71,7 +71,7 @@ func renderer(done <-chan struct{}, paths <-chan inOutPath, data any, c chan err
 // in/out path of each "*.gohtml" file on `paths`.  It sends the result of the
 // walk on the error channel.  If done is closed, walkFiles abandons its work.
 // It copies directories and other regular files from in to out as it walks.
-func walkFiles(done <-chan struct{}, data any, baseIn, baseOut string) (<-chan inOutPath, <-chan error) {
+func walkFiles(done <-chan struct{}, baseIn, baseOut string) (<-chan inOutPath, <-chan error) {
 	paths := make(chan inOutPath)
 	errc := make(chan error, 1)
 	go func() {
@@ -157,7 +157,7 @@ func Render(a RendererArgs) error {
 	done := make(chan struct{})
 	defer close(done)
 
-	paths, errc := walkFiles(done, a.Data, a.InDir, a.OutDir)
+	paths, errc := walkFiles(done, a.InDir, a.OutDir)
 
 	// Start a fixed number of goroutines to render files.
 	c := make(chan error)
