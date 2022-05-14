@@ -109,5 +109,8 @@ func ParseConfigFile(a ParseConfigArgs) (result StatikitConfig, err error) {
 	default:
 		err = errors.New("invalid format")
 	}
+	if result.Data == nil {
+		err = errors.New("parsed data is <nil>")
+	}
 	return
 }
