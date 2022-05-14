@@ -26,6 +26,22 @@ var extToFormat = map[string]ConfigFileFormat{
 	".toml": TomlFormat,
 }
 
+type NotExistError struct {
+	path string
+}
+
+func (e NotExistError) Error() string {
+	return fmt.Sprintf("config file does not exist at path %v", e.path)
+}
+
+func (e NotExistError) Is(target error) bool {
+	targetCast, ok := target.(NotExistError)
+	if !ok {
+		return false
+	}
+	return targetCast.path == e.path
+}
+
 type MoreThanOneError struct {
 	amount uint
 }
@@ -41,14 +57,6 @@ func (e MoreThanOneError) Is(target error) bool {
 	}
 	return targetCast.amount == e.amount
 }
-
-func moreThanOneError(amount uint) MoreThanOneError {
-	return MoreThanOneError{amount: amount}
-}
-
-var (
-	ErrConfigFileNotExist error = errors.New(fs.ErrNotExist.Error())
-)
 
 type StatikitConfig struct {
 	Data any // The data passed to template renders
@@ -91,9 +99,9 @@ func GetConfigFilePath(root string) (resPath string, f ConfigFileFormat, resErr 
 		}
 	}
 	if count == 0 {
-		resErr = ErrConfigFileNotExist
+		resErr = NotExistError{path: root}
 	} else if count > 1 {
-		resErr = moreThanOneError(count)
+		resErr = MoreThanOneError{amount: count}
 	}
 	return
 }

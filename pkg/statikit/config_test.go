@@ -94,17 +94,17 @@ func TestGetConfigFilePath(t *testing.T) {
 		"three": {
 			p:   "",
 			f:   0,
-			err: ErrConfigFileNotExist,
+			err: NotExistError{path: filepath.Join(in, "three")},
 		},
 		"four": {
 			p:   "",
 			f:   0,
-			err: ErrConfigFileNotExist,
+			err: NotExistError{path: filepath.Join(in, "four")},
 		},
 		"five": {
 			p:   "",
 			f:   0,
-			err: moreThanOneError(2),
+			err: MoreThanOneError{amount: 2},
 		},
 	}
 
