@@ -12,7 +12,7 @@ import (
 
 type runTestArgs struct {
 	input    string
-	expected map[string]interface{}
+	expected StatikitConfig
 }
 
 func runTest(a runTestArgs, format ConfigFileFormat) error {
@@ -21,9 +21,8 @@ func runTest(a runTestArgs, format ConfigFileFormat) error {
 	if err != nil {
 		return err
 	}
-	actualMap := actual.(map[string]interface{})
-	if !reflect.DeepEqual(actualMap, a.expected) {
-		return fmt.Errorf("expected: \"%v\", actual: \"%v\"", a.expected, actualMap)
+	if !reflect.DeepEqual(actual, a.expected) {
+		return fmt.Errorf("expected: \"%v\", actual: \"%v\"", a.expected, actual)
 	}
 	return nil
 }
@@ -31,23 +30,23 @@ func runTest(a runTestArgs, format ConfigFileFormat) error {
 func TestParseConfig(t *testing.T) {
 	tomlTests := []runTestArgs{
 		{
-			input:    `Test = "hello"`,
-			expected: map[string]interface{}{"Test": "hello"},
+			input:    "[Data]\nTest = \"hello\"",
+			expected: StatikitConfig{Data: map[string]interface{}{"Test": "hello"}},
 		},
 		{
-			input:    "One = 1\nTwo = 2",
-			expected: map[string]interface{}{"One": int64(1), "Two": int64(2)},
+			input:    "[Data]\nOne = 1\nTwo = 2",
+			expected: StatikitConfig{Data: map[string]interface{}{"One": int64(1), "Two": int64(2)}},
 		},
 	}
 
 	jsonTests := []runTestArgs{
 		{
-			input:    `{"Test": "hello"}`,
-			expected: map[string]interface{}{"Test": "hello"},
+			input:    `{"Data" : {"Test": "hello"}}`,
+			expected: StatikitConfig{Data: map[string]interface{}{"Test": "hello"}},
 		},
 		{
-			input:    `{"One": 1, "Two": 2}`,
-			expected: map[string]interface{}{"One": float64(1), "Two": float64(2)},
+			input:    `{"Data": {"One": 1, "Two": 2}}`,
+			expected: StatikitConfig{Data: map[string]interface{}{"One": float64(1), "Two": float64(2)}},
 		},
 	}
 

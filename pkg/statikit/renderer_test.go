@@ -116,7 +116,7 @@ func TestRender(t *testing.T) {
 			t.Fatalf("couldn't parse config file: %s", configPath)
 		}
 
-		args := RendererArgs{InDir: in, OutDir: out, RendererCount: 20, Data: config}
+		args := RendererArgs{InDir: in, OutDir: out, RendererCount: 20, Data: config.Data}
 
 		err = Render(args)
 		if err != nil {

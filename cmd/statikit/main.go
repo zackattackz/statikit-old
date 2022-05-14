@@ -107,7 +107,7 @@ func main() {
 	}
 
 	// Call the renderer
-	rendererArgs := statikit.RendererArgs{InDir: inDir, OutDir: outDir, RendererCount: rendererCount, Data: config}
+	rendererArgs := statikit.RendererArgs{InDir: inDir, OutDir: outDir, RendererCount: rendererCount, Data: config.Data}
 	if err := statikit.Render(rendererArgs); err != nil {
 		logErrAndExit(err, 1)
 	}

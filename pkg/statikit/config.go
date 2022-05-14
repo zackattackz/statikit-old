@@ -50,6 +50,10 @@ var (
 	ErrConfigFileNotExist error = errors.New(fs.ErrNotExist.Error())
 )
 
+type StatikitConfig struct {
+	Data any // The data passed to template renders
+}
+
 type ParseConfigArgs struct {
 	Reader io.Reader
 	Format ConfigFileFormat
@@ -94,18 +98,16 @@ func GetConfigFilePath(root string) (resPath string, f ConfigFileFormat, resErr 
 	return
 }
 
-func ParseConfigFile(a ParseConfigArgs) (any, error) {
-	result := make(map[string]interface{})
+func ParseConfigFile(a ParseConfigArgs) (result StatikitConfig, err error) {
 	switch a.Format {
 	case JsonFormat:
 		d := json.NewDecoder(a.Reader)
-		d.Decode(&result)
-		return result, nil
+		err = d.Decode(&result)
 	case TomlFormat:
 		d := toml.NewDecoder(a.Reader)
-		_, err := d.Decode(&result)
-		return result, err
+		_, err = d.Decode(&result)
 	default:
-		return nil, errors.New("invalid format")
+		err = errors.New("invalid format")
 	}
+	return
 }
