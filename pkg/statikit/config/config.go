@@ -1,4 +1,4 @@
-package statikit
+package config
 
 import (
 	"encoding/json"

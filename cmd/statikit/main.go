@@ -7,7 +7,8 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/zackattackz/azure_static_site_kit/pkg/statikit"
+	"github.com/zackattackz/azure_static_site_kit/pkg/statikit/config"
+	"github.com/zackattackz/azure_static_site_kit/pkg/statikit/renderer"
 )
 
 const (
@@ -102,7 +103,7 @@ func main() {
 		logErrAndExit(err, 1)
 	}
 
-	configPath, configFormat, err := statikit.GetConfigFilePath(inDir)
+	configPath, configFormat, err := config.GetConfigFilePath(inDir)
 	if err != nil {
 		logErrAndExit(err, 1)
 	}
@@ -112,14 +113,14 @@ func main() {
 	}
 	defer configFile.Close()
 
-	config, err := statikit.ParseConfigFile(statikit.ParseConfigArgs{Reader: configFile, Format: configFormat})
+	config, err := config.ParseConfigFile(config.ParseConfigArgs{Reader: configFile, Format: configFormat})
 	if err != nil {
 		logErrAndExit(err, 1)
 	}
 
 	// Call the renderer
-	rendererArgs := statikit.RendererArgs{InDir: inDir, OutDir: outDir, RendererCount: rendererCount, Data: config.Data}
-	if err := statikit.Render(rendererArgs); err != nil {
+	rendererArgs := renderer.RendererArgs{InDir: inDir, OutDir: outDir, RendererCount: rendererCount, Data: config.Data}
+	if err := renderer.Render(rendererArgs); err != nil {
 		logErrAndExit(err, 1)
 	}
 

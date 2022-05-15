@@ -1,4 +1,4 @@
-package statikit
+package renderer
 
 import (
 	"bytes"
@@ -8,6 +8,8 @@ import (
 	"os"
 	"path/filepath"
 	"testing"
+
+	"github.com/zackattackz/azure_static_site_kit/pkg/statikit/config"
 )
 
 func dirsEqual(a, b string) (bool, error) {
@@ -79,7 +81,7 @@ func TestRender(t *testing.T) {
 	if err != nil {
 		t.Fatalf("error on os.Getwd(): %s", err)
 	}
-	testcasesPath := filepath.Join(wd, "testcases", "renderer")
+	testcasesPath := filepath.Join(wd, "testcases")
 	in := filepath.Join(testcasesPath, "in")
 	out := filepath.Join(testcasesPath, "out")
 	expected := filepath.Join(testcasesPath, "expected")
@@ -105,7 +107,7 @@ func TestRender(t *testing.T) {
 		out := filepath.Join(out, e.Name())
 		expected := filepath.Join(expected, e.Name())
 
-		configPath, configFormat, err := GetConfigFilePath(in)
+		configPath, configFormat, err := config.GetConfigFilePath(in)
 		if err != nil {
 			t.Fatalf("error on GetConfigFilePath: %v", err)
 		}
@@ -116,7 +118,7 @@ func TestRender(t *testing.T) {
 		}
 		defer configFile.Close()
 
-		config, err := ParseConfigFile(ParseConfigArgs{Reader: configFile, Format: configFormat})
+		config, err := config.ParseConfigFile(config.ParseConfigArgs{Reader: configFile, Format: configFormat})
 		if err != nil {
 			t.Fatalf("couldn't parse config file: %s", configPath)
 		}

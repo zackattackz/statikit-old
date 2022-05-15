@@ -1,7 +1,7 @@
 // Based on the bounded parallel Md5All pipeline,
 // from https://web.archive.org/web/20220513193256/https://go.dev/blog/pipelines/bounded.go?m=text
 
-package statikit
+package renderer
 
 import (
 	"fmt"
@@ -11,6 +11,8 @@ import (
 	"path/filepath"
 	"strings"
 	"sync"
+
+	"github.com/zackattackz/azure_static_site_kit/pkg/statikit/config"
 )
 
 // Arguments to statikit.Render
@@ -98,7 +100,7 @@ func walkFiles(done <-chan struct{}, baseIn, baseOut string) (<-chan inOutPath, 
 			}
 
 			// If the file is the config file, skip it
-			matched, err := filepath.Match(ConfigFileName+".*", info.Name())
+			matched, err := filepath.Match(config.ConfigFileName+".*", info.Name())
 			if matched {
 				return nil
 			} else if err != nil {

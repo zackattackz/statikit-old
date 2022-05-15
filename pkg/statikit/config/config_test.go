@@ -1,4 +1,4 @@
-package statikit
+package config
 
 import (
 	"errors"
@@ -77,7 +77,7 @@ func TestGetConfigFilePath(t *testing.T) {
 	if err != nil {
 		t.Fatalf("error on os.Getwd(): %s", err)
 	}
-	testcasesPath := filepath.Join(wd, "testcases", "config")
+	testcasesPath := filepath.Join(wd, "testcases")
 	in := filepath.Join(testcasesPath, "in")
 
 	expectedResults := map[string]expectedResults{
