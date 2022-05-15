@@ -123,7 +123,15 @@ func TestRender(t *testing.T) {
 			t.Fatalf("couldn't parse config file: %s", configPath)
 		}
 
-		args := RendererArgs{InDir: in, OutDir: out, RendererCount: 20, Data: config.Data}
+		_, cfgFileName := filepath.Split(configPath)
+
+		args := RendererArgs{
+			InDir:         in,
+			OutDir:        out,
+			RendererCount: 20,
+			CfgFileName:   cfgFileName,
+			Data:          config.Data,
+		}
 
 		err = Render(args)
 		if err != nil {

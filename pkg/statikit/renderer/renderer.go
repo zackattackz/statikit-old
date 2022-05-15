@@ -11,8 +11,6 @@ import (
 	"path/filepath"
 	"strings"
 	"sync"
-
-	"github.com/zackattackz/azure_static_site_kit/pkg/statikit/config"
 )
 
 // Arguments to statikit.Render
@@ -20,6 +18,7 @@ type RendererArgs struct {
 	InDir         string //Root input directory
 	OutDir        string // Root output directory
 	RendererCount uint   // # of renderer goroutines
+	CfgFileName   string // Name of the config file
 	Data          any    // Data passed to template.Execute
 }
 
@@ -73,7 +72,7 @@ func renderer(done <-chan struct{}, paths <-chan inOutPath, data any, c chan err
 // in/out path of each "*.gohtml" file on `paths`.  It sends the result of the
 // walk on the error channel.  If done is closed, walkFiles abandons its work.
 // It copies directories and other regular files from in to out as it walks.
-func walkFiles(done <-chan struct{}, baseIn, baseOut string) (<-chan inOutPath, <-chan error) {
+func walkFiles(done <-chan struct{}, baseIn, baseOut, cfgFileName string) (<-chan inOutPath, <-chan error) {
 	paths := make(chan inOutPath)
 	errc := make(chan error, 1)
 	go func() {
@@ -100,16 +99,12 @@ func walkFiles(done <-chan struct{}, baseIn, baseOut string) (<-chan inOutPath, 
 			}
 
 			// If the file is the config file, skip it
-			matched, err := filepath.Match(config.ConfigFileName+".*", info.Name())
-			if matched {
+			if info.Name() == cfgFileName {
 				return nil
-			} else if err != nil {
-				return err
 			}
 
 			// Otherwise, check if the file ends in ".gohtml"
 			if filepath.Ext(fullIn) != ".gohtml" {
-
 				// If it doesn't, copy file contents from `fullIn` to `fullOut`
 				fIn, err := os.Open(fullIn)
 				if err != nil {
@@ -127,7 +122,8 @@ func walkFiles(done <-chan struct{}, baseIn, baseOut string) (<-chan inOutPath, 
 				return err
 
 			} else {
-				// If it does, send in/out path to `paths`
+				// If it does end in ".gohtml",
+				// send in/out path to `paths`
 
 				// Replace the ".gohtml" extension with ".html"
 				fullOut = fullOut[:len(fullOut)-len(filepath.Ext(fullOut))] + ".html"
@@ -159,7 +155,8 @@ func Render(a RendererArgs) error {
 	done := make(chan struct{})
 	defer close(done)
 
-	paths, errc := walkFiles(done, a.InDir, a.OutDir)
+	// Start the file walking goroutine
+	paths, errc := walkFiles(done, a.InDir, a.OutDir, a.CfgFileName)
 
 	// Start a fixed number of goroutines to render files.
 	c := make(chan error)

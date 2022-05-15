@@ -83,12 +83,14 @@ func main() {
 		os.Exit(2)
 	}
 
+	// Clean the in/out dirs
 	inDir = filepath.Clean(inDir)
 	outDir = filepath.Clean(outDir)
 
+	// Ensure in dir exists and is a dir
 	s, err := os.Stat(inDir)
 	if err != nil {
-		logErrAndExit(fmt.Errorf("couldn't read %s", inDir), 1)
+		logErrAndExit(fmt.Errorf("couldn't read %s: %w", inDir, err), 1)
 	}
 	if !s.IsDir() {
 		logErrAndExit(fmt.Errorf("%s is not a directory", inDir), 1)
@@ -106,6 +108,7 @@ func main() {
 		logErrAndExit(err, 1)
 	}
 
+	// Get the config path, open the file, and parse it
 	configPath, configFormat, err := config.GetConfigPath(inDir)
 	if err != nil {
 		logErrAndExit(err, 1)
@@ -114,15 +117,23 @@ func main() {
 	if err != nil {
 		logErrAndExit(err, 1)
 	}
-	defer configFile.Close()
-
 	config, err := config.ParseConfig(config.ParseConfigArgs{Reader: configFile, Format: configFormat})
+	configFile.Close()
 	if err != nil {
 		logErrAndExit(err, 1)
 	}
 
+	// Determine cfg file name
+	_, cfgFileName := filepath.Split(configPath)
+
 	// Call the renderer
-	rendererArgs := renderer.RendererArgs{InDir: inDir, OutDir: outDir, RendererCount: rendererCount, Data: config.Data}
+	rendererArgs := renderer.RendererArgs{
+		InDir:         inDir,
+		OutDir:        outDir,
+		RendererCount: rendererCount,
+		CfgFileName:   cfgFileName,
+		Data:          config.Data,
+	}
 	if err := renderer.Render(rendererArgs); err != nil {
 		logErrAndExit(err, 1)
 	}
