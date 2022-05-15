@@ -76,7 +76,7 @@ Returns:
 	(_, _, ErrConfigFileNotExist) If no config files exist
 	(_, _, error) Any generic error from os calls
 */
-func GetConfigFilePath(root string) (resPath string, f ConfigFileFormat, resErr error) {
+func GetConfigPath(root string) (resPath string, f ConfigFileFormat, resErr error) {
 	// For each valid extention, ext,
 	// If the file at path "root/p.ext" exists and is regular,
 	// return the path and it's associated format
@@ -106,7 +106,7 @@ func GetConfigFilePath(root string) (resPath string, f ConfigFileFormat, resErr 
 	return
 }
 
-func ParseConfigFile(a ParseConfigArgs) (result StatikitConfig, err error) {
+func ParseConfig(a ParseConfigArgs) (result StatikitConfig, err error) {
 	switch a.Format {
 	case JsonFormat:
 		d := json.NewDecoder(a.Reader)

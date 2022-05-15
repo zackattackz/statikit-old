@@ -8,6 +8,7 @@ import (
 	"path/filepath"
 
 	"github.com/zackattackz/azure_static_site_kit/pkg/statikit/config"
+	"github.com/zackattackz/azure_static_site_kit/pkg/statikit/previewer"
 	"github.com/zackattackz/azure_static_site_kit/pkg/statikit/renderer"
 )
 
@@ -105,7 +106,7 @@ func main() {
 		logErrAndExit(err, 1)
 	}
 
-	configPath, configFormat, err := config.GetConfigFilePath(inDir)
+	configPath, configFormat, err := config.GetConfigPath(inDir)
 	if err != nil {
 		logErrAndExit(err, 1)
 	}
@@ -115,7 +116,7 @@ func main() {
 	}
 	defer configFile.Close()
 
-	config, err := config.ParseConfigFile(config.ParseConfigArgs{Reader: configFile, Format: configFormat})
+	config, err := config.ParseConfig(config.ParseConfigArgs{Reader: configFile, Format: configFormat})
 	if err != nil {
 		logErrAndExit(err, 1)
 	}
@@ -132,6 +133,7 @@ func main() {
 	case render:
 
 	case preview:
+		previewer.Preview(outDir)
 
 	case publish:
 

@@ -17,7 +17,7 @@ type runTestArgs struct {
 
 func runTest(a runTestArgs, format ConfigFileFormat) error {
 	r := strings.NewReader(a.input)
-	actual, err := ParseConfigFile(ParseConfigArgs{Reader: r, Format: format})
+	actual, err := ParseConfig(ParseConfigArgs{Reader: r, Format: format})
 	if err != nil {
 		return err
 	}
@@ -120,7 +120,7 @@ func TestGetConfigFilePath(t *testing.T) {
 
 		in := filepath.Join(in, e.Name())
 
-		p, f, err := GetConfigFilePath(in)
+		p, f, err := GetConfigPath(in)
 		expected := expectedResults[e.Name()]
 		if err != nil {
 			if !errors.Is(expected.err, err) {
