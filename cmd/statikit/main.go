@@ -77,7 +77,9 @@ func main() {
 	case render, preview, publish:
 		break
 	default:
-		logErrAndExit(fmt.Errorf(usageString), 1)
+		fmt.Fprintln(os.Stderr, usageString)
+		flag.PrintDefaults()
+		os.Exit(2)
 	}
 
 	inDir = filepath.Clean(inDir)
