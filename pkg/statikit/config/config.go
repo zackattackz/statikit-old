@@ -58,7 +58,7 @@ func (e MoreThanOneError) Is(target error) bool {
 	return targetCast.amount == e.amount
 }
 
-type StatikitConfig struct {
+type T struct {
 	Data any // The data passed to template renders
 }
 
@@ -106,7 +106,7 @@ func GetConfigPath(root string) (resPath string, f ConfigFileFormat, resErr erro
 	return
 }
 
-func ParseConfig(a ParseConfigArgs) (result StatikitConfig, err error) {
+func ParseConfig(a ParseConfigArgs) (result T, err error) {
 	switch a.Format {
 	case JsonFormat:
 		d := json.NewDecoder(a.Reader)

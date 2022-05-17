@@ -12,7 +12,7 @@ import (
 
 type runTestArgs struct {
 	input    string
-	expected StatikitConfig
+	expected T
 }
 
 func runTest(a runTestArgs, format ConfigFileFormat) error {
@@ -31,22 +31,22 @@ func TestParseConfig(t *testing.T) {
 	tomlTests := []runTestArgs{
 		{
 			input:    "[Data]\nTest = \"hello\"",
-			expected: StatikitConfig{Data: map[string]interface{}{"Test": "hello"}},
+			expected: T{Data: map[string]interface{}{"Test": "hello"}},
 		},
 		{
 			input:    "[Data]\nOne = 1\nTwo = 2",
-			expected: StatikitConfig{Data: map[string]interface{}{"One": int64(1), "Two": int64(2)}},
+			expected: T{Data: map[string]interface{}{"One": int64(1), "Two": int64(2)}},
 		},
 	}
 
 	jsonTests := []runTestArgs{
 		{
 			input:    `{"Data" : {"Test": "hello"}}`,
-			expected: StatikitConfig{Data: map[string]interface{}{"Test": "hello"}},
+			expected: T{Data: map[string]interface{}{"Test": "hello"}},
 		},
 		{
 			input:    `{"Data": {"One": 1, "Two": 2}}`,
-			expected: StatikitConfig{Data: map[string]interface{}{"One": float64(1), "Two": float64(2)}},
+			expected: T{Data: map[string]interface{}{"One": float64(1), "Two": float64(2)}},
 		},
 	}
 
