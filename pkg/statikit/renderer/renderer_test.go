@@ -107,7 +107,7 @@ func TestRender(t *testing.T) {
 		out := filepath.Join(out, e.Name())
 		expected := filepath.Join(expected, e.Name())
 
-		configPath, configFormat, err := config.GetConfigPath(in)
+		configPath, configFormat, err := config.GetPath(in)
 		if err != nil {
 			t.Fatalf("error on GetConfigFilePath: %v", err)
 		}
@@ -118,14 +118,14 @@ func TestRender(t *testing.T) {
 		}
 		defer configFile.Close()
 
-		config, err := config.ParseConfig(config.ParseConfigArgs{Reader: configFile, Format: configFormat})
+		config, err := config.Parse(config.ParseArgs{Reader: configFile, Format: configFormat})
 		if err != nil {
 			t.Fatalf("couldn't parse config file: %s", configPath)
 		}
 
 		_, cfgFileName := filepath.Split(configPath)
 
-		args := RendererArgs{
+		args := Args{
 			InDir:         in,
 			OutDir:        out,
 			RendererCount: 20,
@@ -133,7 +133,7 @@ func TestRender(t *testing.T) {
 			Data:          config.Data,
 		}
 
-		err = Render(args)
+		err = Run(args)
 		if err != nil {
 			t.Fatalf("error on Render(%v): %s", args, err)
 		}

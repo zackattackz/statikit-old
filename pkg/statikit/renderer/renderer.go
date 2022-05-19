@@ -14,7 +14,7 @@ import (
 )
 
 // Arguments to statikit.Render
-type RendererArgs struct {
+type Args struct {
 	InDir         string //Root input directory
 	OutDir        string // Root output directory
 	RendererCount uint   // # of renderer goroutines
@@ -145,7 +145,7 @@ func walkFiles(done <-chan struct{}, baseIn, baseOut, cfgFileName string) (<-cha
 // duplicating the all directories and files into `a.OutDir`.
 // Except for any encountered "*.gohtml" files,
 // which will be rendered as html.
-func Render(a RendererArgs) error {
+func Run(a Args) error {
 	if a.RendererCount < 1 {
 		return fmt.Errorf("a.RendererCount must be >= 1")
 	}

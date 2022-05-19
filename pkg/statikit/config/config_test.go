@@ -15,9 +15,9 @@ type runTestArgs struct {
 	expected T
 }
 
-func runTest(a runTestArgs, format ConfigFileFormat) error {
+func runTest(a runTestArgs, format Format) error {
 	r := strings.NewReader(a.input)
-	actual, err := ParseConfig(ParseConfigArgs{Reader: r, Format: format})
+	actual, err := Parse(ParseArgs{Reader: r, Format: format})
 	if err != nil {
 		return err
 	}
@@ -67,7 +67,7 @@ func TestParseConfig(t *testing.T) {
 
 type expectedResults struct {
 	p   string
-	f   ConfigFileFormat
+	f   Format
 	err error
 }
 
@@ -120,7 +120,7 @@ func TestGetConfigFilePath(t *testing.T) {
 
 		in := filepath.Join(in, e.Name())
 
-		p, f, err := GetConfigPath(in)
+		p, f, err := GetPath(in)
 		expected := expectedResults[e.Name()]
 		if err != nil {
 			if !errors.Is(expected.err, err) {

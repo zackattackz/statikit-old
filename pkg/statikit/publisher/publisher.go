@@ -2,47 +2,39 @@ package publisher
 
 import (
 	"fmt"
-	"os"
-	"path/filepath"
 
-	"github.com/tidwall/secret"
-	"golang.org/x/term"
+	"github.com/Azure/azure-sdk-for-go/sdk/storage/azblob"
 )
 
-type PublisherArgs struct {
-	Path        string // Path to directory to publish
-	AccountName string // Storage account name
-	Key         string // Storage account access key
+type Args struct {
+	Path          string // Path to directory to publish
+	AccountName   string // Storage account name
+	ContainerName string // Container to store to
+	Key           string // Storage account access key
 }
 
-func Publish(a PublisherArgs) error {
-	const keyFileName = "key.aes256"
-
-	aes, err := os.ReadFile(filepath.Join(a.Path, keyFileName))
+func Publish(a Args) error {
+	cred, err := azblob.NewSharedKeyCredential(a.AccountName, a.Key)
 	if err != nil {
 		return err
 	}
 
-	fmt.Printf("Enter key file password: ")
-	pwd, err := term.ReadPassword(int(os.Stdin.Fd()))
+	fmt.Println(a.Key)
+
+	client, err := azblob.NewContainerClientWithSharedKey(
+		fmt.Sprintf(
+			"https://%s.blob.core.windows.net/%s",
+			a.AccountName,
+			a.ContainerName,
+		),
+		cred,
+		nil,
+	)
 	if err != nil {
 		return err
 	}
-	fmt.Println()
 
-	key, err := secret.Decrypt(string(pwd), aes)
-	if err != nil {
-		return err
-	}
-
-	fmt.Println(string(key))
-
-	// cred, err := azblob.NewSharedKeyCredential(a.AccountName, string(key))
-	// if err != nil {
-	// 	return err
-	// }
-
-	// client, err := azblob.NewContainerClient()
+	fmt.Println(client.URL())
 
 	return nil
 }

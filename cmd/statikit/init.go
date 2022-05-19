@@ -3,38 +3,12 @@ package main
 import (
 	"fmt"
 	"os"
-	"path/filepath"
 
-	"github.com/tidwall/secret"
 	"github.com/zackattackz/azure_static_site_kit/pkg/statikit/config"
 	"golang.org/x/term"
 )
 
 func initialize(path string) error {
-
-	const keyFileName = "key.aes256"
-
-	_, err := os.Stat(path)
-	if err == nil {
-		return fmt.Errorf("%s already exists", path)
-	}
-
-	if err = os.Mkdir(path, 0755); err != nil {
-		return err
-	}
-
-	configFile, err := os.Create(filepath.Join(path, config.ConfigFileName+".toml"))
-	if err != nil {
-		return err
-	}
-	defer configFile.Close()
-	configFile.WriteString("[Data]")
-
-	keyFile, err := os.Create(filepath.Join(path, keyFileName))
-	if err != nil {
-		return err
-	}
-	defer keyFile.Close()
 
 	fmt.Printf("Enter password to encrypt key with: ")
 	pwd, err := term.ReadPassword(int(os.Stdin.Fd()))
@@ -61,13 +35,10 @@ func initialize(path string) error {
 	}
 	fmt.Println()
 
-	aes, err := secret.Encrypt(string(pwd), key)
+	err = config.Create(path, config.TomlFormat, string(pwd), key)
 	if err != nil {
-		return err
+		// Delete outDir if it was made
+		os.RemoveAll(path)
 	}
-
-	keyFile.Write(aes)
-
-	return nil
-
+	return err
 }

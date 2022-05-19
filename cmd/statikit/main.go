@@ -7,7 +7,6 @@ import (
 	"path/filepath"
 
 	"github.com/zackattackz/azure_static_site_kit/pkg/statikit/previewer"
-	"github.com/zackattackz/azure_static_site_kit/pkg/statikit/publisher"
 )
 
 const (
@@ -19,6 +18,7 @@ const (
 	modePreview = "preview"
 	modePublish = "publish"
 	modeInit    = "init"
+	modeHelp    = "help"
 )
 
 func logErrAndExit(err error, code int) {
@@ -49,11 +49,9 @@ func main() {
 		if len(os.Args) < 2 {
 			printUsageAndExit()
 		}
-		outDir := os.Args[1]
+		outDir := filepath.Clean(os.Args[1])
 		err := initialize(outDir)
 		if err != nil {
-			// Delete outDir if it was made
-			os.RemoveAll(outDir)
 			logErrAndExit(err, 1)
 		}
 
@@ -109,8 +107,8 @@ func main() {
 		if len(os.Args) < 2 {
 			printUsageAndExit()
 		}
-		outDir := os.Args[1]
-		err := previewer.Preview(outDir)
+		inDir := filepath.Clean(os.Args[1])
+		err := previewer.Preview(inDir)
 		if err != nil {
 			logErrAndExit(err, 1)
 		}
@@ -119,8 +117,10 @@ func main() {
 		if len(os.Args) < 2 {
 			printUsageAndExit()
 		}
-		outDir := os.Args[1]
-		publisherArgs := publisher.PublisherArgs{Path: outDir}
-		publisher.Publish(publisherArgs)
+		inDir := filepath.Clean(os.Args[1])
+		err := publish(inDir)
+		if err != nil {
+			logErrAndExit(err, 1)
+		}
 	}
 }

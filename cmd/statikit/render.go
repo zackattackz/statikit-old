@@ -54,12 +54,12 @@ func render(a renderArgs) error {
 	}
 
 	// Call the renderer
-	rendererArgs := renderer.RendererArgs{
+	rendererArgs := renderer.Args{
 		InDir:         a.inDir,
 		OutDir:        a.outDir,
 		RendererCount: a.rendererCount,
 		CfgFileName:   a.cfgFileName,
 		Data:          a.data,
 	}
-	return renderer.Render(rendererArgs)
+	return renderer.Run(rendererArgs)
 }

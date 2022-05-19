@@ -10,20 +10,32 @@ import (
 	"path/filepath"
 
 	"github.com/BurntSushi/toml"
+	"github.com/tidwall/secret"
 )
 
-type ConfigFileFormat uint
+type Format uint
 
 const (
-	JsonFormat ConfigFileFormat = iota
+	JsonFormat Format = iota
 	TomlFormat
 
 	ConfigFileName = "statikitConfig"
+	KeyFileName    = "key.aes256"
 )
 
-var extToFormat = map[string]ConfigFileFormat{
+var extToFormat = map[string]Format{
 	".json": JsonFormat,
 	".toml": TomlFormat,
+}
+
+var formatToExt = map[Format]string{
+	JsonFormat: ".json",
+	TomlFormat: ".toml",
+}
+
+var formatToInit = map[Format]string{
+	JsonFormat: "{\n\"Data\": {}\n}",
+	TomlFormat: "[Data]",
 }
 
 type NotExistError struct {
@@ -62,9 +74,9 @@ type T struct {
 	Data any // The data passed to template renders
 }
 
-type ParseConfigArgs struct {
+type ParseArgs struct {
 	Reader io.Reader
-	Format ConfigFileFormat
+	Format Format
 }
 
 /*
@@ -76,7 +88,7 @@ Returns:
 	(_, _, ErrConfigFileNotExist) If no config files exist
 	(_, _, error) Any generic error from os calls
 */
-func GetConfigPath(root string) (resPath string, f ConfigFileFormat, resErr error) {
+func GetPath(root string) (resPath string, f Format, resErr error) {
 	// For each valid extention, ext,
 	// If the file at path "root/p.ext" exists and is regular,
 	// return the path and it's associated format
@@ -106,7 +118,7 @@ func GetConfigPath(root string) (resPath string, f ConfigFileFormat, resErr erro
 	return
 }
 
-func ParseConfig(a ParseConfigArgs) (result T, err error) {
+func Parse(a ParseArgs) (result T, err error) {
 	switch a.Format {
 	case JsonFormat:
 		d := json.NewDecoder(a.Reader)
@@ -121,4 +133,47 @@ func ParseConfig(a ParseConfigArgs) (result T, err error) {
 		err = errors.New("parsed data is <nil>")
 	}
 	return
+}
+
+func Create(path string, f Format, pwd string, key []byte) error {
+
+	_, err := os.Stat(path)
+	if err == nil {
+		return fmt.Errorf("%s already exists", path)
+	}
+
+	if err = os.Mkdir(path, 0755); err != nil {
+		return err
+	}
+
+	configFile, err := os.Create(filepath.Join(path, ConfigFileName+formatToExt[f]))
+	if err != nil {
+		return err
+	}
+	defer configFile.Close()
+	configFile.WriteString(formatToInit[f])
+
+	keyFile, err := os.Create(filepath.Join(path, KeyFileName))
+	if err != nil {
+		return err
+	}
+	defer keyFile.Close()
+
+	aes, err := secret.Encrypt(pwd, key)
+	if err != nil {
+		return err
+	}
+
+	n, err := keyFile.Write(aes)
+	if err != nil {
+		return err
+	}
+	for n < len(aes) {
+		m, err := keyFile.Write(aes[n:])
+		if err != nil {
+			return err
+		}
+		n += m
+	}
+	return nil
 }
