@@ -153,12 +153,12 @@ func Create(path string, f Format, pwd string, key []byte) error {
 		return err
 	}
 
-	configFile, err := os.Create(filepath.Join(path, ConfigFileName+formatToExt[f]))
+	cfgFile, err := os.Create(filepath.Join(path, ConfigFileName+formatToExt[f]))
 	if err != nil {
 		return err
 	}
-	defer configFile.Close()
-	configFile.WriteString(formatToInit[f])
+	defer cfgFile.Close()
+	cfgFile.WriteString(formatToInit[f])
 
 	keyFile, err := os.Create(filepath.Join(path, KeyFileName))
 	if err != nil {
