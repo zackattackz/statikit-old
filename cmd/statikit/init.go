@@ -8,7 +8,11 @@ import (
 	"golang.org/x/term"
 )
 
-func initialize(path string) error {
+type initArgs struct {
+	path string
+}
+
+func initialize(a initArgs) error {
 
 	fmt.Printf("Enter password to encrypt key with: ")
 	pwd, err := term.ReadPassword(int(os.Stdin.Fd()))
@@ -35,10 +39,10 @@ func initialize(path string) error {
 	}
 	fmt.Println()
 
-	err = config.Create(path, config.TomlFormat, string(pwd), key)
+	err = config.Create(a.path, config.TomlFormat, string(pwd), key)
 	if err != nil {
 		// Delete outDir if it was made
-		os.RemoveAll(path)
+		os.RemoveAll(a.path)
 	}
 	return err
 }

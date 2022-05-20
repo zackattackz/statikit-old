@@ -11,8 +11,12 @@ import (
 	"golang.org/x/term"
 )
 
-func publish(path string) error {
-	aes, err := os.ReadFile(filepath.Join(path, config.KeyFileName))
+type publishArgs struct {
+	path string
+}
+
+func publish(a publishArgs) error {
+	aes, err := os.ReadFile(filepath.Join(a.path, config.KeyFileName))
 	if err != nil {
 		return err
 	}
@@ -29,6 +33,6 @@ func publish(path string) error {
 		return err
 	}
 
-	a := publisher.Args{Path: path, Key: string(key)}
-	return publisher.Publish(a)
+	publisherArgs := publisher.Args{Path: a.path, Key: string(key)}
+	return publisher.Publish(publisherArgs)
 }

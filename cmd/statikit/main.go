@@ -1,24 +1,9 @@
 package main
 
 import (
-	"flag"
 	"fmt"
 	"os"
 	"path/filepath"
-
-	"github.com/zackattackz/azure_static_site_kit/pkg/statikit/previewer"
-)
-
-const (
-	version     = "v0.1.0"
-	usageString = "usage: statikit [init | render | preview | publish] opts"
-
-	// Modes of operation
-	modeRender  = "render"
-	modePreview = "preview"
-	modePublish = "publish"
-	modeInit    = "init"
-	modeHelp    = "help"
 )
 
 func logErrAndExit(err error, code int) {
@@ -26,64 +11,58 @@ func logErrAndExit(err error, code int) {
 	os.Exit(code)
 }
 
-func printUsageAndExit() {
-	fmt.Fprintln(os.Stderr, usageString)
-	flag.PrintDefaults()
-	os.Exit(2)
-}
+var fValues flagValues
+
+var mToFs modeToFlags
 
 func main() {
+	_, cmdName := filepath.Split(os.Args[0])
 
 	if len(os.Args) < 2 {
-		printUsageAndExit()
+		printUsageAndExit(cmdName, modeInvalid)
 	}
 
-	mode := os.Args[1]
+	m := mode(os.Args[1])
 
-	// Set os.Args to the remaining args, so the flag package will ignore the first when parsing flags
-	os.Args = os.Args[1:]
+	initModeToFlags(&mToFs, &fValues, cmdName)
 
-	switch mode {
+	remainingArgs := os.Args[2:]
+
+	switch m {
 
 	case modeInit:
-		if len(os.Args) < 2 {
-			printUsageAndExit()
+		if len(remainingArgs) > 1 {
+			printUsageAndExit(cmdName, modeInit)
 		}
-		outDir := filepath.Clean(os.Args[1])
-		err := initialize(outDir)
+		outDir := filepath.Clean(remainingArgs[0])
+		a := initArgs{path: outDir}
+		err := initialize(a)
 		if err != nil {
 			logErrAndExit(err, 1)
 		}
 
 	case modeRender:
-		const (
-			// flags
-			inFlag            = "d"
-			outFlag           = "o"
-			forceFlag         = "f"
-			rendererCountFlag = "renderer-count"
 
-			// default flag values
-			defaultIn            = "."
-			defaultForce         = false
-			defaultRendererCount = 20
+		// Parse flags
+		fs := mToFs[modeRender]
+		fs.Parse(remainingArgs)
 
-			// flag descriptions
-			descIn            = "unrendered input directory"
-			descOut           = "rendered output directory"
-			descForce         = "force output directory removal"
-			descRendererCount = "how many renderer goroutines to be made"
-		)
+		if fs.NArg() > 1 {
+			printUsageAndExit(cmdName, modeRender)
+		}
 
-		a := renderArgs{}
+		// Initialize renderer args from parsed values
+		a := renderArgs{
+			outDir:        fValues.render.outDir,
+			force:         fValues.render.force,
+			rendererCount: fValues.render.rendererCount,
+		}
 
-		// Parse all flags into a
-		defaultOut := filepath.Join(os.TempDir(), "statikitRendered")
-		flag.StringVar(&a.inDir, inFlag, defaultIn, descIn)
-		flag.StringVar(&a.outDir, outFlag, defaultOut, descOut)
-		flag.BoolVar(&a.force, forceFlag, defaultForce, descForce)
-		flag.UintVar(&a.rendererCount, rendererCountFlag, defaultRendererCount, descRendererCount)
-		flag.Parse()
+		// Initialize inDir to (optionally) first non-flag arg
+		a.inDir = fs.Arg(0)
+		if a.inDir == "" {
+			a.inDir = "."
+		}
 
 		// Clean the in/out dirs
 		a.inDir = filepath.Clean(a.inDir)
@@ -104,23 +83,40 @@ func main() {
 		}
 
 	case modePreview:
-		if len(os.Args) < 2 {
-			printUsageAndExit()
+		if len(remainingArgs) > 1 {
+			printUsageAndExit(cmdName, modePreview)
 		}
-		inDir := filepath.Clean(os.Args[1])
-		err := previewer.Preview(inDir)
+		inDir := filepath.Clean(remainingArgs[0])
+		a := previewArgs{path: inDir}
+		err := preview(a)
 		if err != nil {
 			logErrAndExit(err, 1)
 		}
 
 	case modePublish:
-		if len(os.Args) < 2 {
-			printUsageAndExit()
+		if len(remainingArgs) > 1 {
+			printUsageAndExit(cmdName, modePublish)
 		}
-		inDir := filepath.Clean(os.Args[1])
-		err := publish(inDir)
+		inDir := filepath.Clean(remainingArgs[0])
+		a := publishArgs{path: inDir}
+		err := publish(a)
 		if err != nil {
 			logErrAndExit(err, 1)
 		}
+
+	case modeHelp:
+		if len(remainingArgs) > 1 ||
+			len(remainingArgs) < 1 {
+			printUsageAndExit(cmdName, modeHelp)
+		}
+		m := remainingArgs[0]
+		if isMode(m) {
+			printUsageAndExit(cmdName, mode(m))
+
+		}
+		printUsageAndExit(cmdName, modeHelp)
+
+	default:
+		printUsageAndExit(cmdName, modeInvalid)
 	}
 }
