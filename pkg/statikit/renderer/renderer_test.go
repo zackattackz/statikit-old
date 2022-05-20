@@ -76,7 +76,7 @@ func dirsEqual(a, b string) (bool, error) {
 	}
 }
 
-func TestRender(t *testing.T) {
+func TestRun(t *testing.T) {
 	wd, err := os.Getwd()
 	if err != nil {
 		t.Fatalf("error on os.Getwd(): %s", err)
@@ -112,25 +112,23 @@ func TestRender(t *testing.T) {
 			t.Fatalf("error on GetConfigFilePath: %v", err)
 		}
 
-		configFile, err := os.Open(configPath)
+		cfgFile, err := os.Open(configPath)
 		if err != nil {
 			t.Fatalf("couldn't open config file: %s", configPath)
 		}
-		defer configFile.Close()
+		defer cfgFile.Close()
 
-		config, err := config.Parse(config.ParseArgs{Reader: configFile, Format: configFormat})
+		cfg, err := config.Parse(config.ParseArgs{Reader: cfgFile, Format: configFormat})
 		if err != nil {
 			t.Fatalf("couldn't parse config file: %s", configPath)
 		}
-
-		_, cfgFileName := filepath.Split(configPath)
 
 		args := Args{
 			InDir:         in,
 			OutDir:        out,
 			RendererCount: 20,
-			CfgFileName:   cfgFileName,
-			Data:          config.Data,
+			CfgDirName:    config.ConfigDirName,
+			Data:          cfg.Data,
 		}
 
 		err = Run(args)

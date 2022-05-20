@@ -19,7 +19,8 @@ const (
 	JsonFormat Format = iota
 	TomlFormat
 
-	ConfigFileName = "statikitConfig"
+	ConfigFileName = "config"
+	ConfigDirName  = "_statikit"
 	KeyFileName    = "key.aes256"
 )
 
@@ -95,7 +96,7 @@ func GetPath(root string) (resPath string, f Format, resErr error) {
 	// if no valid file is found return fs.ErrNotExist
 	count := uint(0)
 	for ext := range extToFormat {
-		p := filepath.Join(root, ConfigFileName+ext)
+		p := filepath.Join(root, ConfigDirName, ConfigFileName+ext)
 		s, err := os.Stat(p)
 		if errors.Is(err, fs.ErrNotExist) {
 			continue
@@ -141,6 +142,12 @@ func Create(path string, f Format, pwd string, key []byte) error {
 	if err == nil {
 		return fmt.Errorf("%s already exists", path)
 	}
+
+	if err = os.Mkdir(path, 0755); err != nil {
+		return err
+	}
+
+	path = filepath.Join(path, ConfigDirName)
 
 	if err = os.Mkdir(path, 0755); err != nil {
 		return err

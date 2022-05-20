@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"html/template"
 	"io"
+	"io/fs"
 	"os"
 	"path/filepath"
 	"strings"
@@ -18,7 +19,7 @@ type Args struct {
 	InDir         string //Root input directory
 	OutDir        string // Root output directory
 	RendererCount uint   // # of renderer goroutines
-	CfgFileName   string // Name of the config file
+	CfgDirName    string // Name of the config directory
 	Data          any    // Data passed to template.Execute
 }
 
@@ -72,7 +73,7 @@ func renderer(done <-chan struct{}, paths <-chan inOutPath, data any, c chan err
 // in/out path of each "*.gohtml" file on `paths`.  It sends the result of the
 // walk on the error channel.  If done is closed, walkFiles abandons its work.
 // It copies directories and other regular files from in to out as it walks.
-func walkFiles(done <-chan struct{}, baseIn, baseOut, cfgFileName string) (<-chan inOutPath, <-chan error) {
+func walkFiles(done <-chan struct{}, baseIn, baseOut, cfgDirName string) (<-chan inOutPath, <-chan error) {
 	paths := make(chan inOutPath)
 	errc := make(chan error, 1)
 	go func() {
@@ -83,6 +84,12 @@ func walkFiles(done <-chan struct{}, baseIn, baseOut, cfgFileName string) (<-cha
 			if err != nil {
 				return err
 			}
+
+			// If the file is the config directory, skip it
+			if info.Name() == cfgDirName {
+				return fs.SkipDir
+			}
+
 			path = subtractPaths(baseIn, path)
 			// Determine the full in/out paths for our file at `path`
 			fullIn := filepath.Join(baseIn, path)
@@ -96,11 +103,6 @@ func walkFiles(done <-chan struct{}, baseIn, baseOut, cfgFileName string) (<-cha
 			// If not a directory or regular, error out
 			if !info.Mode().IsRegular() {
 				return fmt.Errorf("encountered irregular file: %s", fullIn)
-			}
-
-			// If the file is the config file, skip it
-			if info.Name() == cfgFileName {
-				return nil
 			}
 
 			// Otherwise, check if the file ends in ".gohtml"
@@ -156,7 +158,7 @@ func Run(a Args) error {
 	defer close(done)
 
 	// Start the file walking goroutine
-	paths, errc := walkFiles(done, a.InDir, a.OutDir, a.CfgFileName)
+	paths, errc := walkFiles(done, a.InDir, a.OutDir, a.CfgDirName)
 
 	// Start a fixed number of goroutines to render files.
 	c := make(chan error)

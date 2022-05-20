@@ -68,14 +68,11 @@ func main() {
 		a.inDir = filepath.Clean(a.inDir)
 		a.outDir = filepath.Clean(a.outDir)
 
-		cfg, cfgPath, err := parseConfig(a.inDir)
+		cfg, err := parseConfig(a.inDir)
 		if err != nil {
 			logErrAndExit(err, 1)
 		}
 		a.data = cfg.Data
-
-		// Determine cfg file name
-		_, a.cfgFileName = filepath.Split(cfgPath)
 
 		err = render(a)
 		if err != nil {

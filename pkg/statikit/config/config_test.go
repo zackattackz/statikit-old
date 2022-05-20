@@ -15,7 +15,7 @@ type runTestArgs struct {
 	expected T
 }
 
-func runTest(a runTestArgs, format Format) error {
+func runParseTest(a runTestArgs, format Format) error {
 	r := strings.NewReader(a.input)
 	actual, err := Parse(ParseArgs{Reader: r, Format: format})
 	if err != nil {
@@ -27,7 +27,7 @@ func runTest(a runTestArgs, format Format) error {
 	return nil
 }
 
-func TestParseConfig(t *testing.T) {
+func TestParse(t *testing.T) {
 	tomlTests := []runTestArgs{
 		{
 			input:    "[Data]\nTest = \"hello\"",
@@ -51,14 +51,14 @@ func TestParseConfig(t *testing.T) {
 	}
 
 	for _, jsonTest := range jsonTests {
-		err := runTest(jsonTest, JsonFormat)
+		err := runParseTest(jsonTest, JsonFormat)
 		if err != nil {
 			t.Fatal(err)
 		}
 	}
 
 	for _, tomlTest := range tomlTests {
-		err := runTest(tomlTest, TomlFormat)
+		err := runParseTest(tomlTest, TomlFormat)
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -71,7 +71,7 @@ type expectedResults struct {
 	err error
 }
 
-func TestGetConfigFilePath(t *testing.T) {
+func TestGetPath(t *testing.T) {
 
 	wd, err := os.Getwd()
 	if err != nil {
@@ -82,12 +82,12 @@ func TestGetConfigFilePath(t *testing.T) {
 
 	expectedResults := map[string]expectedResults{
 		"one": {
-			p:   filepath.Join(in, "one", ConfigFileName+".json"),
+			p:   filepath.Join(in, "one", ConfigDirName, ConfigFileName+".json"),
 			f:   JsonFormat,
 			err: nil,
 		},
 		"two": {
-			p:   filepath.Join(in, "two", ConfigFileName+".toml"),
+			p:   filepath.Join(in, "two", ConfigDirName, ConfigFileName+".toml"),
 			f:   TomlFormat,
 			err: nil,
 		},

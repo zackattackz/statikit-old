@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"os"
 
+	"github.com/zackattackz/azure_static_site_kit/pkg/statikit/config"
 	"github.com/zackattackz/azure_static_site_kit/pkg/statikit/renderer"
 )
 
@@ -13,7 +14,6 @@ type renderArgs struct {
 	outDir        string
 	force         bool
 	rendererCount uint
-	cfgFileName   string
 	data          any
 }
 
@@ -58,7 +58,7 @@ func render(a renderArgs) error {
 		InDir:         a.inDir,
 		OutDir:        a.outDir,
 		RendererCount: a.rendererCount,
-		CfgFileName:   a.cfgFileName,
+		CfgDirName:    config.ConfigDirName,
 		Data:          a.data,
 	}
 	return renderer.Run(rendererArgs)
