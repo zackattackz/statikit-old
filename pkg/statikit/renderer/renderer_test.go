@@ -107,20 +107,20 @@ func TestRun(t *testing.T) {
 		out := filepath.Join(out, e.Name())
 		expected := filepath.Join(expected, e.Name())
 
-		configPath, configFormat, err := config.GetPath(in)
+		cfgPath, cfgFormat, err := config.GetPath(in)
 		if err != nil {
 			t.Fatalf("error on GetConfigFilePath: %v", err)
 		}
 
-		cfgFile, err := os.Open(configPath)
+		cfgFile, err := os.Open(cfgPath)
 		if err != nil {
-			t.Fatalf("couldn't open config file: %s", configPath)
+			t.Fatalf("couldn't open config file: %s", cfgPath)
 		}
 		defer cfgFile.Close()
 
-		cfg, err := config.Parse(config.ParseArgs{Reader: cfgFile, Format: configFormat})
+		cfg, err := config.Parse(config.ParseArgs{Reader: cfgFile, Format: cfgFormat})
 		if err != nil {
-			t.Fatalf("couldn't parse config file: %s", configPath)
+			t.Fatalf("couldn't parse config file: %s", cfgPath)
 		}
 
 		args := Args{

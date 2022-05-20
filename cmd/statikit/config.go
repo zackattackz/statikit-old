@@ -9,19 +9,19 @@ import (
 
 func parseConfig(inDir string) (*config.T, error) {
 	// Get the config path, open the file, and parse it
-	configPath, configFormat, err := config.GetPath(inDir)
+	cfgPath, configFormat, err := config.GetPath(inDir)
 	if err != nil {
 		return nil, err
 	}
-	configFile, err := os.Open(filepath.Join(configPath))
+	cfgFile, err := os.Open(filepath.Join(cfgPath))
 	if err != nil {
 		return nil, err
 	}
-	config, err := config.Parse(config.ParseArgs{Reader: configFile, Format: configFormat})
-	configFile.Close()
+	cfg, err := config.Parse(config.ParseArgs{Reader: cfgFile, Format: configFormat})
+	cfgFile.Close()
 	if err != nil {
 		return nil, err
 	}
 
-	return &config, nil
+	return &cfg, nil
 }
