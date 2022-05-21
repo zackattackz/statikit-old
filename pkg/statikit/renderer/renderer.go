@@ -10,8 +10,10 @@ import (
 	"io/fs"
 	"os"
 	"path/filepath"
-	"strings"
 	"sync"
+
+	sp "github.com/zackattackz/azure_static_site_kit/internal/subtractPaths"
+	"github.com/zackattackz/azure_static_site_kit/pkg/statikit/data"
 )
 
 // Arguments to statikit.Render
@@ -21,6 +23,7 @@ type Args struct {
 	RendererCount uint   // # of renderer goroutines
 	CfgDirName    string // Name of the config directory
 	Data          any    // Data passed to template.Execute
+	DataMap       data.Map
 }
 
 // Combination of input/output paths
@@ -29,15 +32,8 @@ type inOutPath struct {
 	out string
 }
 
-func subtractPaths(parent, child string) string {
-	parentList := strings.Split(parent, string(filepath.Separator))
-	childList := strings.Split(child, string(filepath.Separator))
-
-	return filepath.Join(childList[len(parentList):]...)
-}
-
 // Render the template at `p.in` to `p.out`, providing `data`
-func render(p inOutPath, data any) error {
+func render(p inOutPath, dataMap data.Map, baseIn string) error {
 	fOut, err := os.Create(p.out)
 	if err != nil {
 		return err
@@ -54,15 +50,21 @@ func render(p inOutPath, data any) error {
 		return err
 	}
 
-	return t.Execute(fOut, data)
+	path := sp.SubtractPaths(baseIn, p.in)
+	d, ok := dataMap[path]
+	if !ok {
+		d = dataMap[data.DefaultDataName]
+	}
+
+	return t.Execute(fOut, d)
 }
 
 // renderer reads in/out paths from `paths` and sends result of rendering
 // to `c` until either `paths` or `done` is closed.
-func renderer(done <-chan struct{}, paths <-chan inOutPath, data any, c chan error) {
+func renderer(done <-chan struct{}, paths <-chan inOutPath, dataMap data.Map, baseIn string, c chan error) {
 	for p := range paths {
 		select {
-		case c <- render(p, data):
+		case c <- render(p, dataMap, baseIn):
 		case <-done:
 			return
 		}
@@ -90,7 +92,7 @@ func walkFiles(done <-chan struct{}, baseIn, baseOut, cfgDirName string) (<-chan
 				return fs.SkipDir
 			}
 
-			path = subtractPaths(baseIn, path)
+			path = sp.SubtractPaths(baseIn, path)
 			// Determine the full in/out paths for our file at `path`
 			fullIn := filepath.Join(baseIn, path)
 			fullOut := filepath.Join(baseOut, path)
@@ -166,7 +168,7 @@ func Run(a Args) error {
 	wg.Add(int(a.RendererCount))
 	for i := 0; i < int(a.RendererCount); i++ {
 		go func() {
-			renderer(done, paths, a.Data, c)
+			renderer(done, paths, a.DataMap, a.InDir, c)
 			wg.Done()
 		}()
 	}

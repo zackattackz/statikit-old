@@ -9,6 +9,7 @@ import (
 	"path/filepath"
 	"testing"
 
+	sp "github.com/zackattackz/azure_static_site_kit/internal/subtractPaths"
 	"github.com/zackattackz/azure_static_site_kit/pkg/statikit/config"
 )
 
@@ -20,7 +21,7 @@ func dirsEqual(a, b string) (bool, error) {
 		if err != nil {
 			return err
 		}
-		path = subtractPaths(a, path)
+		path = sp.SubtractPaths(a, path)
 		fullA := filepath.Join(a, path)
 		fullB := filepath.Join(b, path)
 
