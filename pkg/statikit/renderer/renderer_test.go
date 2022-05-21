@@ -11,6 +11,7 @@ import (
 
 	sp "github.com/zackattackz/azure_static_site_kit/internal/subtractPaths"
 	"github.com/zackattackz/azure_static_site_kit/pkg/statikit/config"
+	"github.com/zackattackz/azure_static_site_kit/pkg/statikit/data"
 )
 
 func dirsEqual(a, b string) (bool, error) {
@@ -108,20 +109,9 @@ func TestRun(t *testing.T) {
 		out := filepath.Join(out, e.Name())
 		expected := filepath.Join(expected, e.Name())
 
-		cfgPath, cfgFormat, err := config.GetPath(in)
+		dataMap, err := data.Parse(in)
 		if err != nil {
-			t.Fatalf("error on GetConfigFilePath: %v", err)
-		}
-
-		cfgFile, err := os.Open(cfgPath)
-		if err != nil {
-			t.Fatalf("couldn't open config file: %s", cfgPath)
-		}
-		defer cfgFile.Close()
-
-		cfg, err := config.Parse(config.ParseArgs{Reader: cfgFile, Format: cfgFormat})
-		if err != nil {
-			t.Fatalf("couldn't parse config file: %s", cfgPath)
+			t.Fatalf("couldn't parse data dir: %s %v", in, err)
 		}
 
 		args := Args{
@@ -129,7 +119,7 @@ func TestRun(t *testing.T) {
 			OutDir:        out,
 			RendererCount: 20,
 			CfgDirName:    config.ConfigDirName,
-			Data:          cfg.Data,
+			DataMap:       dataMap,
 		}
 
 		err = Run(args)

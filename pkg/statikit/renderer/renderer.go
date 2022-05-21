@@ -10,6 +10,7 @@ import (
 	"io/fs"
 	"os"
 	"path/filepath"
+	"strings"
 	"sync"
 
 	sp "github.com/zackattackz/azure_static_site_kit/internal/subtractPaths"
@@ -18,12 +19,11 @@ import (
 
 // Arguments to statikit.Render
 type Args struct {
-	InDir         string //Root input directory
-	OutDir        string // Root output directory
-	RendererCount uint   // # of renderer goroutines
-	CfgDirName    string // Name of the config directory
-	Data          any    // Data passed to template.Execute
-	DataMap       data.Map
+	InDir         string   //Root input directory
+	OutDir        string   // Root output directory
+	RendererCount uint     // # of renderer goroutines
+	CfgDirName    string   // Name of the config directory
+	DataMap       data.Map // Data passed to template.Execute
 }
 
 // Combination of input/output paths
@@ -51,7 +51,8 @@ func render(p inOutPath, dataMap data.Map, baseIn string) error {
 	}
 
 	path := sp.SubtractPaths(baseIn, p.in)
-	d, ok := dataMap[path]
+	pathWithoutExt := strings.TrimSuffix(path, filepath.Ext(path))
+	d, ok := dataMap[pathWithoutExt]
 	if !ok {
 		d = dataMap[data.DefaultDataName]
 	}
