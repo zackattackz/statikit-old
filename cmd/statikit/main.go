@@ -22,13 +22,13 @@ var mToFs modeToFlags
 func main() {
 	_, cmdName := filepath.Split(os.Args[0])
 
+	initModeToFlags(&mToFs, &fValues, cmdName)
+
 	if len(os.Args) < 2 {
 		printUsageAndExit(cmdName, modeInvalid)
 	}
 
 	m := mode(os.Args[1])
-
-	initModeToFlags(&mToFs, &fValues, cmdName)
 
 	remainingArgs := os.Args[2:]
 
