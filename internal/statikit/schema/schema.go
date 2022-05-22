@@ -10,8 +10,8 @@ import (
 	"strings"
 
 	"github.com/BurntSushi/toml"
-	sp "github.com/zackattackz/azure_static_site_kit/internal/subtractPaths"
-	"github.com/zackattackz/azure_static_site_kit/pkg/statikit/config"
+	"github.com/zackattackz/azure_static_site_kit/internal/statikit/config"
+	sp "github.com/zackattackz/azure_static_site_kit/pkg/subtractPaths"
 )
 
 type Format uint

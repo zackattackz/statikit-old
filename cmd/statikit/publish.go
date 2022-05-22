@@ -6,8 +6,8 @@ import (
 	"path/filepath"
 
 	"github.com/tidwall/secret"
-	"github.com/zackattackz/azure_static_site_kit/pkg/statikit/config"
-	"github.com/zackattackz/azure_static_site_kit/pkg/statikit/publisher"
+	"github.com/zackattackz/azure_static_site_kit/internal/statikit/config"
+	"github.com/zackattackz/azure_static_site_kit/internal/statikit/publisher"
 	"golang.org/x/term"
 )
 

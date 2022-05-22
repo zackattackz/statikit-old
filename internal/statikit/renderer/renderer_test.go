@@ -9,9 +9,9 @@ import (
 	"path/filepath"
 	"testing"
 
-	sp "github.com/zackattackz/azure_static_site_kit/internal/subtractPaths"
-	"github.com/zackattackz/azure_static_site_kit/pkg/statikit/config"
-	"github.com/zackattackz/azure_static_site_kit/pkg/statikit/schema"
+	"github.com/zackattackz/azure_static_site_kit/internal/statikit/config"
+	"github.com/zackattackz/azure_static_site_kit/internal/statikit/schema"
+	sp "github.com/zackattackz/azure_static_site_kit/pkg/subtractPaths"
 )
 
 func dirsEqual(a, b string) (bool, error) {

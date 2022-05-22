@@ -1,6 +1,6 @@
 package main
 
-import "github.com/zackattackz/azure_static_site_kit/pkg/statikit/previewer"
+import "github.com/zackattackz/azure_static_site_kit/internal/statikit/previewer"
 
 type previewArgs struct {
 	path string

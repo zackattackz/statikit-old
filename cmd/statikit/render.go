@@ -5,9 +5,9 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/zackattackz/azure_static_site_kit/pkg/statikit/config"
-	"github.com/zackattackz/azure_static_site_kit/pkg/statikit/renderer"
-	"github.com/zackattackz/azure_static_site_kit/pkg/statikit/schema"
+	"github.com/zackattackz/azure_static_site_kit/internal/statikit/config"
+	"github.com/zackattackz/azure_static_site_kit/internal/statikit/renderer"
+	"github.com/zackattackz/azure_static_site_kit/internal/statikit/schema"
 )
 
 type renderArgs struct {

@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/zackattackz/azure_static_site_kit/pkg/statikit/config"
+	"github.com/zackattackz/azure_static_site_kit/internal/statikit/config"
 	"golang.org/x/term"
 )
 

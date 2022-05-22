@@ -5,7 +5,7 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/zackattackz/azure_static_site_kit/pkg/statikit/schema"
+	"github.com/zackattackz/azure_static_site_kit/internal/statikit/schema"
 )
 
 func logErrAndExit(err error, code int) {

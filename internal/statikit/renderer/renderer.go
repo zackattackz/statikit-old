@@ -13,8 +13,8 @@ import (
 	"strings"
 	"sync"
 
-	sp "github.com/zackattackz/azure_static_site_kit/internal/subtractPaths"
-	"github.com/zackattackz/azure_static_site_kit/pkg/statikit/schema"
+	"github.com/zackattackz/azure_static_site_kit/internal/statikit/schema"
+	sp "github.com/zackattackz/azure_static_site_kit/pkg/subtractPaths"
 )
 
 // Arguments to statikit.Render
