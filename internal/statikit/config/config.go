@@ -132,6 +132,10 @@ func Parse(a ParseArgs) (result T, err error) {
 	}
 	// Clean all Ignore paths
 	for i, p := range result.Ignore {
+		// If any pattern is bad, return ErrBadPattern
+		if _, err = filepath.Match(p, ""); errors.Is(err, filepath.ErrBadPattern) {
+			return
+		}
 		result.Ignore[i] = filepath.Clean(p)
 	}
 	return
