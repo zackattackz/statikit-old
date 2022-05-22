@@ -10,37 +10,51 @@ import (
 func TestParse(t *testing.T) {
 	expectedMap := map[string]Map{
 		"one": {
-			"blog": {
-				"TestOne": "TestOne",
-				"TestTwo": int64(2),
+			"blog": Data{
+				Data: map[string]any{
+					"TestOne": "TestOne",
+					"TestTwo": int64(2),
+				},
 			},
 		},
 		"two": {
-			"blog": {
-				"TestOne": int64(100),
+			"blog": Data{
+				Data: map[string]any{
+					"TestOne": int64(100),
+				},
 			},
-			filepath.Join("folder", "nested"): {
-				"NestedTest": "Nested",
+			filepath.Join("folder", "nested"): Data{
+				Data: map[string]any{
+					"NestedTest": "Nested",
+				},
 			},
 		},
 		"three": {
-			"blog": {
-				"BlogStuff": "Hi There",
+			"blog": Data{
+				Data: map[string]any{
+					"BlogStuff": "Hi There",
+				},
 			},
-			filepath.Join("another", "another.testing"): {
-				"SomeMore": "Stuff",
+			filepath.Join("another", "another.testing"): Data{
+				Data: map[string]any{
+					"SomeMore": "Stuff",
+				},
 			},
-			filepath.Join("folder", "nested"): {
-				"NestedTest": "Nested",
+			filepath.Join("folder", "nested"): Data{
+				Data: map[string]any{
+					"NestedTest": "Nested",
+				},
 			},
-			filepath.Join("folder", "blog"): {
-				"JsonBlog": "HelloWorld",
-				"Title":    "Title",
-				"Date":     "Today",
+			filepath.Join("folder", "blog"): Data{
+				Data: map[string]any{"JsonBlog": "HelloWorld",
+					"Title": "Title",
+					"Date":  "Today",
+				},
 			},
-			filepath.Join("folder", "deep", "status"): {
-				"Likes":  float64(100),
-				"Person": "Jesus",
+			filepath.Join("folder", "deep", "status"): Data{
+				Data: map[string]any{"Likes": float64(100),
+					"Person": "Jesus",
+				},
 			},
 		},
 	}

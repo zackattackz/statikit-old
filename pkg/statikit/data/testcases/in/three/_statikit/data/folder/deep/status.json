@@ -1,4 +1,6 @@
 {
-    "Likes": 100,
-    "Person": "Jesus"
+    "Data": {
+        "Likes": 100,
+        "Person": "Jesus"
+    }
 }

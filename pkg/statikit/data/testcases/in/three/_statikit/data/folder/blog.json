@@ -1,5 +1,7 @@
 {
-    "JsonBlog": "HelloWorld",
-    "Title": "Title",
-    "Date": "Today"
+    "Data": {
+        "JsonBlog": "HelloWorld",
+        "Title": "Title",
+        "Date": "Today"
+    }
 }

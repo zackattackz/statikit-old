@@ -16,8 +16,12 @@ import (
 
 type Format uint
 
+type Data struct {
+	Data map[string]any
+}
+
 // Maps path names to their data
-type Map map[string]map[string]any
+type Map map[string]Data
 
 const (
 	JsonFormat Format = iota
@@ -32,7 +36,7 @@ var extToFormat = map[string]Format{
 	".toml": TomlFormat,
 }
 
-func parse(r io.Reader, format Format) (d map[string]any, err error) {
+func parse(r io.Reader, format Format) (d Data, err error) {
 	switch format {
 	case JsonFormat:
 		dec := json.NewDecoder(r)
@@ -43,7 +47,7 @@ func parse(r io.Reader, format Format) (d map[string]any, err error) {
 	default:
 		err = errors.New("invalid format")
 	}
-	if d == nil {
+	if d.Data == nil {
 		err = errors.New("parsed data is <nil>")
 	}
 	return
