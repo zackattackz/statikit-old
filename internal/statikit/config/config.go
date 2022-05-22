@@ -72,7 +72,7 @@ func (e MoreThanOneError) Is(target error) bool {
 }
 
 type T struct {
-	Data any // The data passed to template renders
+	Ignore []string // List of file globs to ignore when rendering
 }
 
 type ParseArgs struct {
@@ -130,8 +130,9 @@ func Parse(a ParseArgs) (result T, err error) {
 	default:
 		err = errors.New("invalid format")
 	}
-	if result.Data == nil {
-		err = errors.New("parsed data is <nil>")
+	// Clean all Ignore paths
+	for i, p := range result.Ignore {
+		result.Ignore[i] = filepath.Clean(p)
 	}
 	return
 }
