@@ -14,16 +14,16 @@ import (
 	"sync"
 
 	sp "github.com/zackattackz/azure_static_site_kit/internal/subtractPaths"
-	"github.com/zackattackz/azure_static_site_kit/pkg/statikit/data"
+	"github.com/zackattackz/azure_static_site_kit/pkg/statikit/schema"
 )
 
 // Arguments to statikit.Render
 type Args struct {
-	InDir         string   //Root input directory
-	OutDir        string   // Root output directory
-	RendererCount uint     // # of renderer goroutines
-	CfgDirName    string   // Name of the config directory
-	DataMap       data.Map // Data passed to template.Execute
+	InDir         string     //Root input directory
+	OutDir        string     // Root output directory
+	RendererCount uint       // # of renderer goroutines
+	CfgDirName    string     // Name of the config directory
+	SchemaMap     schema.Map // Scehma passed to template.Execute
 }
 
 // Combination of input/output paths
@@ -33,7 +33,7 @@ type inOutPath struct {
 }
 
 // Render the template at `p.in` to `p.out`, providing `data`
-func render(p inOutPath, dataMap data.Map, baseIn string) error {
+func render(p inOutPath, dataMap schema.Map, baseIn string) error {
 	fOut, err := os.Create(p.out)
 	if err != nil {
 		return err
@@ -54,7 +54,7 @@ func render(p inOutPath, dataMap data.Map, baseIn string) error {
 	pathWithoutExt := strings.TrimSuffix(path, filepath.Ext(path))
 	d, ok := dataMap[pathWithoutExt]
 	if !ok {
-		d = dataMap[data.DefaultDataName]
+		d = dataMap[schema.DefaultDataName]
 	}
 
 	return t.Execute(fOut, d)
@@ -62,7 +62,7 @@ func render(p inOutPath, dataMap data.Map, baseIn string) error {
 
 // renderer reads in/out paths from `paths` and sends result of rendering
 // to `c` until either `paths` or `done` is closed.
-func renderer(done <-chan struct{}, paths <-chan inOutPath, dataMap data.Map, baseIn string, c chan error) {
+func renderer(done <-chan struct{}, paths <-chan inOutPath, dataMap schema.Map, baseIn string, c chan error) {
 	for p := range paths {
 		select {
 		case c <- render(p, dataMap, baseIn):
@@ -169,7 +169,7 @@ func Run(a Args) error {
 	wg.Add(int(a.RendererCount))
 	for i := 0; i < int(a.RendererCount); i++ {
 		go func() {
-			renderer(done, paths, a.DataMap, a.InDir, c)
+			renderer(done, paths, a.SchemaMap, a.InDir, c)
 			wg.Done()
 		}()
 	}

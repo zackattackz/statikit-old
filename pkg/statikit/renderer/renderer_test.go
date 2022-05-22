@@ -11,7 +11,7 @@ import (
 
 	sp "github.com/zackattackz/azure_static_site_kit/internal/subtractPaths"
 	"github.com/zackattackz/azure_static_site_kit/pkg/statikit/config"
-	"github.com/zackattackz/azure_static_site_kit/pkg/statikit/data"
+	"github.com/zackattackz/azure_static_site_kit/pkg/statikit/schema"
 )
 
 func dirsEqual(a, b string) (bool, error) {
@@ -109,9 +109,9 @@ func TestRun(t *testing.T) {
 		out := filepath.Join(out, e.Name())
 		expected := filepath.Join(expected, e.Name())
 
-		dataMap, err := data.Parse(in)
+		schemaMap, err := schema.Parse(in)
 		if err != nil {
-			t.Fatalf("couldn't parse data dir: %s %v", in, err)
+			t.Fatalf("couldn't parse schema dir: %s %v", in, err)
 		}
 
 		args := Args{
@@ -119,7 +119,7 @@ func TestRun(t *testing.T) {
 			OutDir:        out,
 			RendererCount: 20,
 			CfgDirName:    config.ConfigDirName,
-			DataMap:       dataMap,
+			SchemaMap:     schemaMap,
 		}
 
 		err = Run(args)

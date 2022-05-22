@@ -1,4 +1,4 @@
-package data
+package schema
 
 import (
 	"os"
@@ -10,7 +10,7 @@ import (
 func TestParse(t *testing.T) {
 	expectedMap := map[string]Map{
 		"one": {
-			"blog": Data{
+			"blog": T{
 				Data: map[string]any{
 					"TestOne": "TestOne",
 					"TestTwo": int64(2),
@@ -18,40 +18,40 @@ func TestParse(t *testing.T) {
 			},
 		},
 		"two": {
-			"blog": Data{
+			"blog": T{
 				Data: map[string]any{
 					"TestOne": int64(100),
 				},
 			},
-			filepath.Join("folder", "nested"): Data{
+			filepath.Join("folder", "nested"): T{
 				Data: map[string]any{
 					"NestedTest": "Nested",
 				},
 			},
 		},
 		"three": {
-			"blog": Data{
+			"blog": T{
 				Data: map[string]any{
 					"BlogStuff": "Hi There",
 				},
 			},
-			filepath.Join("another", "another.testing"): Data{
+			filepath.Join("another", "another.testing"): T{
 				Data: map[string]any{
 					"SomeMore": "Stuff",
 				},
 			},
-			filepath.Join("folder", "nested"): Data{
+			filepath.Join("folder", "nested"): T{
 				Data: map[string]any{
 					"NestedTest": "Nested",
 				},
 			},
-			filepath.Join("folder", "blog"): Data{
+			filepath.Join("folder", "blog"): T{
 				Data: map[string]any{"JsonBlog": "HelloWorld",
 					"Title": "Title",
 					"Date":  "Today",
 				},
 			},
-			filepath.Join("folder", "deep", "status"): Data{
+			filepath.Join("folder", "deep", "status"): T{
 				Data: map[string]any{"Likes": float64(100),
 					"Person": "Jesus",
 				},

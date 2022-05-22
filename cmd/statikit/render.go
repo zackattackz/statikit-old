@@ -6,8 +6,8 @@ import (
 	"os"
 
 	"github.com/zackattackz/azure_static_site_kit/pkg/statikit/config"
-	"github.com/zackattackz/azure_static_site_kit/pkg/statikit/data"
 	"github.com/zackattackz/azure_static_site_kit/pkg/statikit/renderer"
+	"github.com/zackattackz/azure_static_site_kit/pkg/statikit/schema"
 )
 
 type renderArgs struct {
@@ -15,7 +15,7 @@ type renderArgs struct {
 	outDir        string
 	force         bool
 	rendererCount uint
-	dataMap       data.Map
+	schemaMap     schema.Map
 }
 
 func warnErase(outDir string) error {
@@ -60,7 +60,7 @@ func render(a renderArgs) error {
 		OutDir:        a.outDir,
 		RendererCount: a.rendererCount,
 		CfgDirName:    config.ConfigDirName,
-		DataMap:       a.dataMap,
+		SchemaMap:     a.schemaMap,
 	}
 	return renderer.Run(rendererArgs)
 }

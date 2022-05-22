@@ -1,4 +1,4 @@
-package data
+package schema
 
 import (
 	"encoding/json"
@@ -16,18 +16,18 @@ import (
 
 type Format uint
 
-type Data struct {
+type T struct {
 	Data map[string]any
 }
 
 // Maps path names to their data
-type Map map[string]Data
+type Map map[string]T
 
 const (
 	JsonFormat Format = iota
 	TomlFormat
 
-	DataDirName     = "data"
+	DataDirName     = "schema"
 	DefaultDataName = "_defaultvalues"
 )
 
@@ -36,7 +36,7 @@ var extToFormat = map[string]Format{
 	".toml": TomlFormat,
 }
 
-func parse(r io.Reader, format Format) (d Data, err error) {
+func parse(r io.Reader, format Format) (d T, err error) {
 	switch format {
 	case JsonFormat:
 		dec := json.NewDecoder(r)

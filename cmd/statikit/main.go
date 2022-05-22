@@ -5,7 +5,7 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/zackattackz/azure_static_site_kit/pkg/statikit/data"
+	"github.com/zackattackz/azure_static_site_kit/pkg/statikit/schema"
 )
 
 func logErrAndExit(err error, code int) {
@@ -75,11 +75,11 @@ func main() {
 		// 	logErrAndExit(err, 1)
 		// }
 
-		dataMap, err := data.Parse(a.inDir)
+		schemaMap, err := schema.Parse(a.inDir)
 		if err != nil {
 			logErrAndExit(err, 1)
 		}
-		a.dataMap = dataMap
+		a.schemaMap = schemaMap
 
 		err = render(a)
 		if err != nil {
