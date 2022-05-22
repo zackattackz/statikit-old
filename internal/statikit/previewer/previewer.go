@@ -14,8 +14,8 @@ type T struct {
 	port string
 }
 
-func New(path, port string) T {
-	return T{path: path, port: port}
+func New(path, port string) Interface {
+	return &T{path: path, port: port}
 }
 
 func (t *T) Preview() error {

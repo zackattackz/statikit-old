@@ -94,7 +94,7 @@ func main() {
 		}
 		inDir := filepath.Clean(remainingArgs[0])
 		p := previewer.New(inDir, ":8080")
-		err := preview.Run(&p)
+		err := preview.Run(p)
 		if err != nil {
 			logErrAndExit(err, 1)
 		}
