@@ -15,7 +15,7 @@ func TestParse(t *testing.T) {
 					"TestOne": "TestOne",
 					"TestTwo": int64(2),
 				},
-				FileSub: map[string][]byte{},
+				FileSub: map[string]string{},
 			},
 		},
 		"two": {
@@ -23,13 +23,13 @@ func TestParse(t *testing.T) {
 				Data: map[string]any{
 					"TestOne": int64(100),
 				},
-				FileSub: map[string][]byte{},
+				FileSub: map[string]string{},
 			},
 			filepath.Join("folder", "nested"): T{
 				Data: map[string]any{
 					"NestedTest": "Nested",
 				},
-				FileSub: map[string][]byte{},
+				FileSub: map[string]string{},
 			},
 		},
 		"three": {
@@ -37,32 +37,32 @@ func TestParse(t *testing.T) {
 				Data: map[string]any{
 					"BlogStuff": "Hi There",
 				},
-				FileSub: map[string][]byte{},
+				FileSub: map[string]string{},
 			},
 			filepath.Join("another", "another.testing"): T{
 				Data: map[string]any{
 					"SomeMore": "Stuff",
 				},
-				FileSub: map[string][]byte{},
+				FileSub: map[string]string{},
 			},
 			filepath.Join("folder", "nested"): T{
 				Data: map[string]any{
 					"NestedTest": "Nested",
 				},
-				FileSub: map[string][]byte{},
+				FileSub: map[string]string{},
 			},
 			filepath.Join("folder", "blog"): T{
 				Data: map[string]any{"JsonBlog": "HelloWorld",
 					"Title": "Title",
 					"Date":  "Today",
 				},
-				FileSub: map[string][]byte{},
+				FileSub: map[string]string{},
 			},
 			filepath.Join("folder", "deep", "status"): T{
 				Data: map[string]any{"Likes": float64(100),
 					"Person": "Jesus",
 				},
-				FileSub: map[string][]byte{},
+				FileSub: map[string]string{},
 			},
 		},
 		"four": {
@@ -71,8 +71,8 @@ func TestParse(t *testing.T) {
 					"TestOne": "TestOne",
 					"TestTwo": int64(2),
 				},
-				FileSub: map[string][]byte{
-					"Head": []byte("<head><title>Hello World</title></head>"),
+				FileSub: map[string]string{
+					"Head": "<head><title>Hello World</title></head>",
 				},
 			},
 		},

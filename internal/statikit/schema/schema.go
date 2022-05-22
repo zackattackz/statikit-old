@@ -18,7 +18,7 @@ type Format uint
 
 type T struct {
 	Data    map[string]any    // Variable names->raw data to be substituted, comes directly from schema
-	FileSub map[string][]byte // Variable names->raw data to be substituted, comes from a file
+	FileSub map[string]string // Variable names->raw data to be substituted, comes from a file
 }
 
 type parseT struct {
@@ -92,7 +92,7 @@ func Parse(root string) (Map, error) {
 		// Populate a new schema.T with the parsed fields
 		s := T{}
 		s.Data = d.Data
-		s.FileSub = make(map[string][]byte)
+		s.FileSub = make(map[string]string)
 
 		// Read all the files in FileSubst and
 		// fill out T's FileSubst with contents
@@ -105,7 +105,7 @@ func Parse(root string) (Map, error) {
 			if err != nil {
 				return err
 			}
-			s.FileSub[v] = b
+			s.FileSub[v] = string(b)
 		}
 
 		res[pathWithoutExt] = s
