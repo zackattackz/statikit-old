@@ -109,6 +109,22 @@ func TestRun(t *testing.T) {
 		out := filepath.Join(out, e.Name())
 		expected := filepath.Join(expected, e.Name())
 
+		cfgPath, f, err := config.GetPath(in)
+		if err != nil {
+			t.Fatalf("couldn't get config path: %v", err)
+		}
+
+		cfgFile, err := os.Open(cfgPath)
+		if err != nil {
+			t.Fatalf("couldn't open config file: %v", err)
+		}
+		defer cfgFile.Close()
+
+		cfg, err := config.Parse(config.ParseArgs{Reader: cfgFile, Format: f})
+		if err != nil {
+			t.Fatalf("couldn't parse config file: %v", err)
+		}
+
 		schemaMap, err := schema.Parse(in)
 		if err != nil {
 			t.Fatalf("couldn't parse schema dir: %s %v", in, err)
@@ -120,6 +136,7 @@ func TestRun(t *testing.T) {
 			RendererCount: 20,
 			CfgDirName:    config.ConfigDirName,
 			SchemaMap:     schemaMap,
+			Ignore:        cfg.Ignore,
 		}
 
 		err = Run(args)

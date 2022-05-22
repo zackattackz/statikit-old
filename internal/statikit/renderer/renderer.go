@@ -24,6 +24,7 @@ type Args struct {
 	RendererCount uint       // # of renderer goroutines
 	CfgDirName    string     // Name of the config directory
 	SchemaMap     schema.Map // Scehma passed to template.Execute
+	Ignore        []string   // Filepath globs to ignore when walking
 }
 
 // Combination of input/output paths
@@ -76,7 +77,7 @@ func renderer(done <-chan struct{}, paths <-chan inOutPath, dataMap schema.Map, 
 // in/out path of each "*.gohtml" file on `paths`.  It sends the result of the
 // walk on the error channel.  If done is closed, walkFiles abandons its work.
 // It copies directories and other regular files from in to out as it walks.
-func walkFiles(done <-chan struct{}, baseIn, baseOut, cfgDirName string) (<-chan inOutPath, <-chan error) {
+func walkFiles(done <-chan struct{}, baseIn, baseOut, cfgDirName string, ignore []string) (<-chan inOutPath, <-chan error) {
 	paths := make(chan inOutPath)
 	errc := make(chan error, 1)
 	go func() {
@@ -94,6 +95,18 @@ func walkFiles(done <-chan struct{}, baseIn, baseOut, cfgDirName string) (<-chan
 			}
 
 			path = sp.SubtractPaths(baseIn, path)
+
+			// If path is in ignore list, skip it
+			for _, ignorePath := range ignore {
+				if match, _ := filepath.Match(ignorePath, path); match {
+					if info.IsDir() {
+						return fs.SkipDir
+					} else {
+						return nil
+					}
+				}
+			}
+
 			// Determine the full in/out paths for our file at `path`
 			fullIn := filepath.Join(baseIn, path)
 			fullOut := filepath.Join(baseOut, path)
@@ -161,7 +174,7 @@ func Run(a Args) error {
 	defer close(done)
 
 	// Start the file walking goroutine
-	paths, errc := walkFiles(done, a.InDir, a.OutDir, a.CfgDirName)
+	paths, errc := walkFiles(done, a.InDir, a.OutDir, a.CfgDirName, a.Ignore)
 
 	// Start a fixed number of goroutines to render files.
 	c := make(chan error)
