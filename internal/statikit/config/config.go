@@ -10,7 +10,7 @@ import (
 	"path/filepath"
 
 	"github.com/BurntSushi/toml"
-	"github.com/tidwall/secret"
+	"github.com/zackattackz/azure_static_site_kit/pkg/secret"
 )
 
 type Format uint

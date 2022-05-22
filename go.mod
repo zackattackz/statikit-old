@@ -14,6 +14,5 @@ require (
 
 require (
 	github.com/Azure/azure-sdk-for-go/sdk/storage/azblob v0.4.1
-	github.com/tidwall/secret v0.1.0
 	golang.org/x/term v0.0.0-20220411215600-e5f449aeb171
 )
