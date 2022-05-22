@@ -17,7 +17,13 @@ import (
 type Format uint
 
 type T struct {
-	Data map[string]any
+	Data    map[string]any    // Variable names->raw data to be substituted, comes directly from schema
+	FileSub map[string][]byte // Variable names->raw data to be substituted, comes from a file
+}
+
+type parseT struct {
+	Data    map[string]any    // Variable names->raw data to be substituted
+	FileSub map[string]string // Variable names->filename, relative to _statikit/.., that contains data to be substituted
 }
 
 // Maps path names to their data
@@ -36,7 +42,7 @@ var extToFormat = map[string]Format{
 	".toml": TomlFormat,
 }
 
-func parse(r io.Reader, format Format) (d T, err error) {
+func parse(r io.Reader, format Format) (d parseT, err error) {
 	switch format {
 	case JsonFormat:
 		dec := json.NewDecoder(r)
@@ -57,15 +63,18 @@ func Parse(root string) (Map, error) {
 	res := make(Map)
 	dataPath := filepath.Join(root, config.ConfigDirName, DataDirName)
 	err := filepath.WalkDir(dataPath, func(path string, e fs.DirEntry, err error) error {
+		// Ensure there was no error in call
 		if err != nil {
 			return err
 		}
 
+		// Skip e if it is dir or non-regular
 		if e.IsDir() ||
 			!e.Type().IsRegular() {
 			return nil
 		}
 
+		// Determine path without extension, to be used to address res
 		pathFromData := sp.SubtractPaths(dataPath, path)
 		ext := filepath.Ext(pathFromData)
 		format := extToFormat[ext]
@@ -79,7 +88,27 @@ func Parse(root string) (Map, error) {
 		if err != nil {
 			return err
 		}
-		res[pathWithoutExt] = d
+
+		// Populate a new schema.T with the parsed fields
+		s := T{}
+		s.Data = d.Data
+		s.FileSub = make(map[string][]byte)
+
+		// Read all the files in FileSubst and
+		// fill out T's FileSubst with contents
+		for v, fname := range d.FileSub {
+			f, err := os.Open(filepath.Join(root, filepath.Clean(fname)))
+			if err != nil {
+				return err
+			}
+			b, err := io.ReadAll(f)
+			if err != nil {
+				return err
+			}
+			s.FileSub[v] = b
+		}
+
+		res[pathWithoutExt] = s
 		return nil
 	})
 	if err != nil {
