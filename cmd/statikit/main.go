@@ -5,6 +5,8 @@ import (
 	"os"
 	"path/filepath"
 
+	"github.com/zackattackz/azure_static_site_kit/cmd/statikit/preview"
+	"github.com/zackattackz/azure_static_site_kit/internal/statikit/previewer"
 	"github.com/zackattackz/azure_static_site_kit/internal/statikit/schema"
 )
 
@@ -46,10 +48,10 @@ func main() {
 	case modeRender:
 
 		// Parse flags
-		fs := mToFs[modeRender]
-		fs.Parse(remainingArgs)
+		flagSet := mToFs[modeRender]
+		flagSet.Parse(remainingArgs)
 
-		if fs.NArg() > 1 {
+		if flagSet.NArg() > 1 {
 			printUsageAndExit(cmdName, modeRender)
 		}
 
@@ -61,7 +63,7 @@ func main() {
 		}
 
 		// Initialize inDir to (optionally) first non-flag arg
-		a.inDir = fs.Arg(0)
+		a.inDir = flagSet.Arg(0)
 		if a.inDir == "" {
 			a.inDir = "."
 		}
@@ -91,8 +93,8 @@ func main() {
 			printUsageAndExit(cmdName, modePreview)
 		}
 		inDir := filepath.Clean(remainingArgs[0])
-		a := previewArgs{path: inDir}
-		err := preview(a)
+		p := previewer.New(inDir, ":8080")
+		err := preview.Run(&p)
 		if err != nil {
 			logErrAndExit(err, 1)
 		}

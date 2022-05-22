@@ -5,11 +5,22 @@ import (
 	"net/http"
 )
 
-const port = ":8080"
+type Interface interface {
+	Preview() error
+}
 
-func Preview(path string) error {
-	http.Handle("/", http.FileServer(http.Dir(path)))
-	fmt.Printf("Previewing contents of %s\n", path)
-	fmt.Println("Listening on port " + port)
-	return http.ListenAndServe(port, nil)
+type T struct {
+	path string
+	port string
+}
+
+func New(path, port string) T {
+	return T{path: path, port: port}
+}
+
+func (t *T) Preview() error {
+	http.Handle("/", http.FileServer(http.Dir(t.path)))
+	fmt.Printf("Previewing contents of %s\n", t.path)
+	fmt.Println("Listening on port " + t.port)
+	return http.ListenAndServe(t.port, nil)
 }

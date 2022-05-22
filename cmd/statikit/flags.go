@@ -4,11 +4,13 @@ import (
 	"flag"
 	"os"
 	"path/filepath"
+
+	"github.com/zackattackz/azure_static_site_kit/cmd/statikit/preview"
 )
 
 type flagValues struct {
 	render  renderArgs
-	preview previewArgs
+	preview preview.Args
 	publish publishArgs
 	init    initArgs
 }
