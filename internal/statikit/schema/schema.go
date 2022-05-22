@@ -3,6 +3,7 @@ package schema
 import (
 	"encoding/json"
 	"errors"
+	"html/template"
 	"io"
 	"io/fs"
 	"os"
@@ -17,8 +18,8 @@ import (
 type Format uint
 
 type T struct {
-	Data    map[string]any    // Variable names->raw data to be substituted, comes directly from schema
-	FileSub map[string]string // Variable names->raw data to be substituted, comes from a file
+	Data    map[string]any           // Variable names->raw data to be substituted, comes directly from schema
+	FileSub map[string]template.HTML // Variable names->html to be substituted, comes from a file
 }
 
 type parseT struct {
@@ -92,7 +93,7 @@ func Parse(root string) (Map, error) {
 		// Populate a new schema.T with the parsed fields
 		s := T{}
 		s.Data = d.Data
-		s.FileSub = make(map[string]string)
+		s.FileSub = make(map[string]template.HTML)
 
 		// Read all the files in FileSubst and
 		// fill out T's FileSubst with contents
@@ -105,7 +106,7 @@ func Parse(root string) (Map, error) {
 			if err != nil {
 				return err
 			}
-			s.FileSub[v] = string(b)
+			s.FileSub[v] = template.HTML(b)
 		}
 
 		res[pathWithoutExt] = s

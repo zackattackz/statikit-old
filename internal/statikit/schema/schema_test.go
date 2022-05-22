@@ -1,6 +1,7 @@
 package schema
 
 import (
+	"html/template"
 	"os"
 	"path/filepath"
 	"reflect"
@@ -15,7 +16,7 @@ func TestParse(t *testing.T) {
 					"TestOne": "TestOne",
 					"TestTwo": int64(2),
 				},
-				FileSub: map[string]string{},
+				FileSub: map[string]template.HTML{},
 			},
 		},
 		"two": {
@@ -23,13 +24,13 @@ func TestParse(t *testing.T) {
 				Data: map[string]any{
 					"TestOne": int64(100),
 				},
-				FileSub: map[string]string{},
+				FileSub: map[string]template.HTML{},
 			},
 			filepath.Join("folder", "nested"): T{
 				Data: map[string]any{
 					"NestedTest": "Nested",
 				},
-				FileSub: map[string]string{},
+				FileSub: map[string]template.HTML{},
 			},
 		},
 		"three": {
@@ -37,32 +38,32 @@ func TestParse(t *testing.T) {
 				Data: map[string]any{
 					"BlogStuff": "Hi There",
 				},
-				FileSub: map[string]string{},
+				FileSub: map[string]template.HTML{},
 			},
 			filepath.Join("another", "another.testing"): T{
 				Data: map[string]any{
 					"SomeMore": "Stuff",
 				},
-				FileSub: map[string]string{},
+				FileSub: map[string]template.HTML{},
 			},
 			filepath.Join("folder", "nested"): T{
 				Data: map[string]any{
 					"NestedTest": "Nested",
 				},
-				FileSub: map[string]string{},
+				FileSub: map[string]template.HTML{},
 			},
 			filepath.Join("folder", "blog"): T{
 				Data: map[string]any{"JsonBlog": "HelloWorld",
 					"Title": "Title",
 					"Date":  "Today",
 				},
-				FileSub: map[string]string{},
+				FileSub: map[string]template.HTML{},
 			},
 			filepath.Join("folder", "deep", "status"): T{
 				Data: map[string]any{"Likes": float64(100),
 					"Person": "Jesus",
 				},
-				FileSub: map[string]string{},
+				FileSub: map[string]template.HTML{},
 			},
 		},
 		"four": {
@@ -71,7 +72,7 @@ func TestParse(t *testing.T) {
 					"TestOne": "TestOne",
 					"TestTwo": int64(2),
 				},
-				FileSub: map[string]string{
+				FileSub: map[string]template.HTML{
 					"Head": "<head><title>Hello World</title></head>",
 				},
 			},
