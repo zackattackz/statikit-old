@@ -11,7 +11,7 @@ import (
 	"github.com/zackattackz/azure_static_site_kit/internal/statikit/initializer"
 )
 
-type Interface interface {
+type Parser interface {
 	Parse(*T) error
 }
 
@@ -56,7 +56,7 @@ type parser struct {
 	path string
 }
 
-func NewParser(root string) (Interface, error) {
+func NewParser(root string) (Parser, error) {
 	parser := &parser{root: root}
 	p, err := getPath(root)
 	if err != nil {
@@ -80,8 +80,8 @@ func getPath(root string) (string, error) {
 	return p, nil
 }
 
-func (t *parser) Parse(cfg *T) error {
-	f, err := os.Open(t.path)
+func (p *parser) Parse(cfg *T) error {
+	f, err := os.Open(p.path)
 	if err != nil {
 		return err
 	}

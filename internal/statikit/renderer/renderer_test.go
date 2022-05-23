@@ -9,7 +9,7 @@ import (
 	"path/filepath"
 	"testing"
 
-	config "github.com/zackattackz/azure_static_site_kit/internal/statikit/configParser"
+	"github.com/zackattackz/azure_static_site_kit/internal/statikit/config"
 	"github.com/zackattackz/azure_static_site_kit/internal/statikit/initializer"
 	"github.com/zackattackz/azure_static_site_kit/internal/statikit/schema"
 	sp "github.com/zackattackz/azure_static_site_kit/pkg/subtractPaths"

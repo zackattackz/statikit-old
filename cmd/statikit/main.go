@@ -6,7 +6,7 @@ import (
 	"path/filepath"
 
 	"github.com/zackattackz/azure_static_site_kit/cmd/statikit/preview"
-	config "github.com/zackattackz/azure_static_site_kit/internal/statikit/configParser"
+	"github.com/zackattackz/azure_static_site_kit/internal/statikit/config"
 	"github.com/zackattackz/azure_static_site_kit/internal/statikit/initializer"
 	"github.com/zackattackz/azure_static_site_kit/internal/statikit/previewer"
 	"github.com/zackattackz/azure_static_site_kit/internal/statikit/schema"
