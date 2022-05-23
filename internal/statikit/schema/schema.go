@@ -1,4 +1,4 @@
-package schemaParser
+package schema
 
 import (
 	"errors"
@@ -18,20 +18,20 @@ type Interface interface {
 	Parse(*Map) error
 }
 
-type Schema struct {
+type T struct {
 	Data    map[string]any           // Variable names->raw data to be substituted, comes directly from schema
 	FileSub map[string]template.HTML // Variable names->html to be substituted, comes from a file
 }
 
-type parseSchema struct {
+type parseT struct {
 	Data    map[string]any    // Variable names->raw data to be substituted
 	FileSub map[string]string // Variable names->filename, relative to _statikit/.., that contains data to be substituted
 }
 
 // Maps path names to their data
-type Map map[string]Schema
+type Map map[string]T
 
-func parse(r io.Reader) (d parseSchema, err error) {
+func parse(r io.Reader) (d parseT, err error) {
 	dec := toml.NewDecoder(r)
 	_, err = dec.Decode(&d)
 	if d.Data == nil {
@@ -40,16 +40,16 @@ func parse(r io.Reader) (d parseSchema, err error) {
 	return
 }
 
-type t struct {
+type parser struct {
 	root string
 }
 
-func New(root string) Interface {
-	return &t{root: root}
+func NewParser(root string) Interface {
+	return &parser{root: root}
 }
 
-func (t *t) Parse(m *Map) error {
-	dataPath := filepath.Join(t.root, initializer.StatikitDirName, initializer.SchemaDirName)
+func (p *parser) Parse(m *Map) error {
+	dataPath := filepath.Join(p.root, initializer.StatikitDirName, initializer.SchemaDirName)
 	err := filepath.WalkDir(dataPath, func(path string, e fs.DirEntry, err error) error {
 		// Ensure there was no error in call
 		if err != nil {
@@ -78,14 +78,14 @@ func (t *t) Parse(m *Map) error {
 		}
 
 		// Populate a new schema.T with the parsed fields
-		s := Schema{}
+		s := T{}
 		s.Data = d.Data
 		s.FileSub = make(map[string]template.HTML)
 
 		// Read all the files in FileSubst and
 		// fill out T's FileSubst with contents
 		for v, fname := range d.FileSub {
-			f, err := os.Open(filepath.Join(t.root, filepath.Clean(fname)))
+			f, err := os.Open(filepath.Join(p.root, filepath.Clean(fname)))
 			if err != nil {
 				return err
 			}

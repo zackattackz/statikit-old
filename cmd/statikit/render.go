@@ -6,7 +6,7 @@ import (
 	"os"
 
 	"github.com/zackattackz/azure_static_site_kit/internal/statikit/renderer"
-	"github.com/zackattackz/azure_static_site_kit/internal/statikit/schemaParser"
+	"github.com/zackattackz/azure_static_site_kit/internal/statikit/schema"
 )
 
 type renderArgs struct {
@@ -14,7 +14,7 @@ type renderArgs struct {
 	outDir        string
 	force         bool
 	rendererCount uint
-	schemaMap     schemaParser.Map
+	schemaMap     schema.Map
 	ignore        []string
 }
 

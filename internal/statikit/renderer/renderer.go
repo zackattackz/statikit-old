@@ -14,17 +14,17 @@ import (
 	"sync"
 
 	"github.com/zackattackz/azure_static_site_kit/internal/statikit/initializer"
-	"github.com/zackattackz/azure_static_site_kit/internal/statikit/schemaParser"
+	"github.com/zackattackz/azure_static_site_kit/internal/statikit/schema"
 	sp "github.com/zackattackz/azure_static_site_kit/pkg/subtractPaths"
 )
 
 // Arguments to statikit.Render
 type Args struct {
-	InDir         string           //Root input directory
-	OutDir        string           // Root output directory
-	RendererCount uint             // # of renderer goroutines
-	SchemaMap     schemaParser.Map // Scehma passed to template.Execute
-	Ignore        []string         // Filepath globs to ignore when walking
+	InDir         string     //Root input directory
+	OutDir        string     // Root output directory
+	RendererCount uint       // # of renderer goroutines
+	SchemaMap     schema.Map // Scehma passed to template.Execute
+	Ignore        []string   // Filepath globs to ignore when walking
 }
 
 // Combination of input/output paths
@@ -34,7 +34,7 @@ type inOutPath struct {
 }
 
 // Render the template at `p.in` to `p.out`, providing `data`
-func render(p inOutPath, dataMap schemaParser.Map, baseIn string) error {
+func render(p inOutPath, dataMap schema.Map, baseIn string) error {
 	fOut, err := os.Create(p.out)
 	if err != nil {
 		return err
@@ -63,7 +63,7 @@ func render(p inOutPath, dataMap schemaParser.Map, baseIn string) error {
 
 // renderer reads in/out paths from `paths` and sends result of rendering
 // to `c` until either `paths` or `done` is closed.
-func renderer(done <-chan struct{}, paths <-chan inOutPath, dataMap schemaParser.Map, baseIn string, c chan error) {
+func renderer(done <-chan struct{}, paths <-chan inOutPath, dataMap schema.Map, baseIn string, c chan error) {
 	for p := range paths {
 		select {
 		case c <- render(p, dataMap, baseIn):

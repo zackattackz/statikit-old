@@ -6,10 +6,10 @@ import (
 	"path/filepath"
 
 	"github.com/zackattackz/azure_static_site_kit/cmd/statikit/preview"
-	"github.com/zackattackz/azure_static_site_kit/internal/statikit/configParser"
+	config "github.com/zackattackz/azure_static_site_kit/internal/statikit/configParser"
 	"github.com/zackattackz/azure_static_site_kit/internal/statikit/initializer"
 	"github.com/zackattackz/azure_static_site_kit/internal/statikit/previewer"
-	"github.com/zackattackz/azure_static_site_kit/internal/statikit/schemaParser"
+	"github.com/zackattackz/azure_static_site_kit/internal/statikit/schema"
 )
 
 func logErrAndExit(err error, code int) {
@@ -79,19 +79,19 @@ func main() {
 		// 	logErrAndExit(err, 1)
 		// }
 
-		schemaMap := make(schemaParser.Map)
-		parser := schemaParser.New(a.inDir)
-		err := parser.Parse(&schemaMap)
+		schemaMap := make(schema.Map)
+		schemaParser := schema.NewParser(a.inDir)
+		err := schemaParser.Parse(&schemaMap)
 		if err != nil {
 			logErrAndExit(err, 1)
 		}
 		a.schemaMap = schemaMap
 
-		cfgParser, err := configParser.New(a.inDir)
+		cfgParser, err := config.NewParser(a.inDir)
 		if err != nil {
 			logErrAndExit(err, 1)
 		}
-		cfg := configParser.Config{}
+		cfg := config.T{}
 		cfgParser.Parse(&cfg)
 		a.ignore = cfg.Ignore
 		a.ignore = append(a.ignore, initializer.StatikitDirName)

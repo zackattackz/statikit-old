@@ -1,4 +1,4 @@
-package configParser
+package config
 
 import (
 	"errors"
@@ -12,7 +12,7 @@ import (
 )
 
 type Interface interface {
-	Parse(*Config) error
+	Parse(*T) error
 }
 
 type NotExistError struct {
@@ -47,17 +47,17 @@ func (e MoreThanOneError) Is(target error) bool {
 	return targetCast.amount == e.amount
 }
 
-type Config struct {
+type T struct {
 	Ignore []string // List of file globs to ignore when rendering
 }
 
-type t struct {
+type parser struct {
 	root string
 	path string
 }
 
-func New(root string) (Interface, error) {
-	parser := &t{root: root}
+func NewParser(root string) (Interface, error) {
+	parser := &parser{root: root}
 	p, err := getPath(root)
 	if err != nil {
 		return nil, err
@@ -80,7 +80,7 @@ func getPath(root string) (string, error) {
 	return p, nil
 }
 
-func (t *t) Parse(cfg *Config) error {
+func (t *parser) Parse(cfg *T) error {
 	f, err := os.Open(t.path)
 	if err != nil {
 		return err

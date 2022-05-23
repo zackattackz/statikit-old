@@ -9,9 +9,9 @@ import (
 	"path/filepath"
 	"testing"
 
-	"github.com/zackattackz/azure_static_site_kit/internal/statikit/configParser"
+	config "github.com/zackattackz/azure_static_site_kit/internal/statikit/configParser"
 	"github.com/zackattackz/azure_static_site_kit/internal/statikit/initializer"
-	"github.com/zackattackz/azure_static_site_kit/internal/statikit/schemaParser"
+	"github.com/zackattackz/azure_static_site_kit/internal/statikit/schema"
 	sp "github.com/zackattackz/azure_static_site_kit/pkg/subtractPaths"
 )
 
@@ -110,19 +110,19 @@ func TestRun(t *testing.T) {
 		out := filepath.Join(out, e.Name())
 		expected := filepath.Join(expected, e.Name())
 
-		cfgParser, err := configParser.New(in)
+		cfgParser, err := config.NewParser(in)
 		if err != nil {
 			t.Fatalf("error on New(%s): %v", in, err)
 		}
-		cfg := configParser.Config{}
+		cfg := config.T{}
 		err = cfgParser.Parse(&cfg)
 		if err != nil {
 			t.Fatalf("couldn't parse config file: %v", err)
 		}
 
-		schmaParser := schemaParser.New(in)
-		schemaMap := make(schemaParser.Map)
-		err = schmaParser.Parse(&schemaMap)
+		schemaParser := schema.NewParser(in)
+		schemaMap := make(schema.Map)
+		err = schemaParser.Parse(&schemaMap)
 		if err != nil {
 			t.Fatalf("couldn't parse schema dir: %s %v", in, err)
 		}

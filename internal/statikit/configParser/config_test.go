@@ -1,4 +1,4 @@
-package configParser
+package config
 
 import (
 	"os"
@@ -29,11 +29,11 @@ func testParseIgnore(t *testing.T) {
 			t.Fatalf("entry is not a directory: %s", d.Name())
 		}
 
-		cfgParser, err := New(testPath)
+		cfgParser, err := NewParser(testPath)
 		if err != nil {
 			t.Fatalf("error on New(%s): %v", testPath, err)
 		}
-		cfg := Config{}
+		cfg := T{}
 		err = cfgParser.Parse(&cfg)
 		if err != nil {
 			t.Fatalf("error on Parse(): %v", err)
