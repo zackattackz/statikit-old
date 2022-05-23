@@ -10,6 +10,7 @@ import (
 	"testing"
 
 	"github.com/zackattackz/azure_static_site_kit/internal/statikit/configParser"
+	"github.com/zackattackz/azure_static_site_kit/internal/statikit/initializer"
 	"github.com/zackattackz/azure_static_site_kit/internal/statikit/schemaParser"
 	sp "github.com/zackattackz/azure_static_site_kit/pkg/subtractPaths"
 )
@@ -133,6 +134,7 @@ func TestRun(t *testing.T) {
 			SchemaMap:     schemaMap,
 			Ignore:        cfg.Ignore,
 		}
+		args.Ignore = append(args.Ignore, initializer.StatikitDirName)
 
 		err = Run(args)
 		if err != nil {

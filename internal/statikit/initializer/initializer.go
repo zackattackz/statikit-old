@@ -13,7 +13,7 @@ const (
 	ConfigFileName  = "config.toml"
 	SchemaDirName   = "schema"
 	KeyFileName     = "key.aes256"
-	DefaultDataName = "_defaultvalues.toml"
+	DefaultDataName = "_defaultvalues"
 )
 
 func Create(path string, pwd string, key []byte) error {
