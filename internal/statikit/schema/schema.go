@@ -14,7 +14,7 @@ import (
 	sp "github.com/zackattackz/azure_static_site_kit/pkg/subtractPaths"
 )
 
-type Interface interface {
+type Parser interface {
 	Parse(*Map) error
 }
 
@@ -44,7 +44,7 @@ type parser struct {
 	root string
 }
 
-func NewParser(root string) Interface {
+func NewParser(root string) Parser {
 	return &parser{root: root}
 }
 
