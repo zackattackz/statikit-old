@@ -9,7 +9,7 @@ import (
 	"path/filepath"
 	"testing"
 
-	"github.com/zackattackz/azure_static_site_kit/internal/statikit/config"
+	"github.com/zackattackz/azure_static_site_kit/internal/statikit/configParser"
 	"github.com/zackattackz/azure_static_site_kit/internal/statikit/schema"
 	sp "github.com/zackattackz/azure_static_site_kit/pkg/subtractPaths"
 )
@@ -109,18 +109,12 @@ func TestRun(t *testing.T) {
 		out := filepath.Join(out, e.Name())
 		expected := filepath.Join(expected, e.Name())
 
-		cfgPath, f, err := config.GetPath(in)
+		cfgParser, err := configParser.New(in)
 		if err != nil {
-			t.Fatalf("couldn't get config path: %v", err)
+			t.Fatalf("error on New(%s): %v", in, err)
 		}
-
-		cfgFile, err := os.Open(cfgPath)
-		if err != nil {
-			t.Fatalf("couldn't open config file: %v", err)
-		}
-		defer cfgFile.Close()
-
-		cfg, err := config.Parse(config.ParseArgs{Reader: cfgFile, Format: f})
+		cfg := configParser.Config{}
+		err = cfgParser.Parse(&cfg)
 		if err != nil {
 			t.Fatalf("couldn't parse config file: %v", err)
 		}
@@ -134,7 +128,7 @@ func TestRun(t *testing.T) {
 			InDir:         in,
 			OutDir:        out,
 			RendererCount: 20,
-			CfgDirName:    config.ConfigDirName,
+			CfgDirName:    configParser.ConfigDirName,
 			SchemaMap:     schemaMap,
 			Ignore:        cfg.Ignore,
 		}

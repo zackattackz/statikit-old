@@ -13,18 +13,18 @@ import (
 	"strings"
 	"sync"
 
-	"github.com/zackattackz/azure_static_site_kit/internal/statikit/schema"
+	"github.com/zackattackz/azure_static_site_kit/internal/statikit/initializer"
+	"github.com/zackattackz/azure_static_site_kit/internal/statikit/schemaParser"
 	sp "github.com/zackattackz/azure_static_site_kit/pkg/subtractPaths"
 )
 
 // Arguments to statikit.Render
 type Args struct {
-	InDir         string     //Root input directory
-	OutDir        string     // Root output directory
-	RendererCount uint       // # of renderer goroutines
-	CfgDirName    string     // Name of the config directory
-	SchemaMap     schema.Map // Scehma passed to template.Execute
-	Ignore        []string   // Filepath globs to ignore when walking
+	InDir         string           //Root input directory
+	OutDir        string           // Root output directory
+	RendererCount uint             // # of renderer goroutines
+	SchemaMap     schemaParser.Map // Scehma passed to template.Execute
+	Ignore        []string         // Filepath globs to ignore when walking
 }
 
 // Combination of input/output paths
@@ -34,7 +34,7 @@ type inOutPath struct {
 }
 
 // Render the template at `p.in` to `p.out`, providing `data`
-func render(p inOutPath, dataMap schema.Map, baseIn string) error {
+func render(p inOutPath, dataMap schemaParser.Map, baseIn string) error {
 	fOut, err := os.Create(p.out)
 	if err != nil {
 		return err
@@ -55,7 +55,7 @@ func render(p inOutPath, dataMap schema.Map, baseIn string) error {
 	pathWithoutExt := strings.TrimSuffix(path, filepath.Ext(path))
 	d, ok := dataMap[pathWithoutExt]
 	if !ok {
-		d = dataMap[schema.DefaultDataName]
+		d = dataMap[initializer.DefaultDataName]
 	}
 
 	return t.Execute(fOut, d)
@@ -63,7 +63,7 @@ func render(p inOutPath, dataMap schema.Map, baseIn string) error {
 
 // renderer reads in/out paths from `paths` and sends result of rendering
 // to `c` until either `paths` or `done` is closed.
-func renderer(done <-chan struct{}, paths <-chan inOutPath, dataMap schema.Map, baseIn string, c chan error) {
+func renderer(done <-chan struct{}, paths <-chan inOutPath, dataMap schemaParser.Map, baseIn string, c chan error) {
 	for p := range paths {
 		select {
 		case c <- render(p, dataMap, baseIn):
@@ -77,7 +77,7 @@ func renderer(done <-chan struct{}, paths <-chan inOutPath, dataMap schema.Map, 
 // in/out path of each "*.gohtml" file on `paths`.  It sends the result of the
 // walk on the error channel.  If done is closed, walkFiles abandons its work.
 // It copies directories and other regular files from in to out as it walks.
-func walkFiles(done <-chan struct{}, baseIn, baseOut, cfgDirName string, ignore []string) (<-chan inOutPath, <-chan error) {
+func walkFiles(done <-chan struct{}, baseIn, baseOut string, ignore []string) (<-chan inOutPath, <-chan error) {
 	paths := make(chan inOutPath)
 	errc := make(chan error, 1)
 	go func() {
@@ -87,11 +87,6 @@ func walkFiles(done <-chan struct{}, baseIn, baseOut, cfgDirName string, ignore 
 		errc <- filepath.Walk(baseIn, func(path string, info os.FileInfo, err error) error {
 			if err != nil {
 				return err
-			}
-
-			// If the file is the config directory, skip it
-			if info.Name() == cfgDirName {
-				return fs.SkipDir
 			}
 
 			path = sp.SubtractPaths(baseIn, path)
@@ -174,7 +169,7 @@ func Run(a Args) error {
 	defer close(done)
 
 	// Start the file walking goroutine
-	paths, errc := walkFiles(done, a.InDir, a.OutDir, a.CfgDirName, a.Ignore)
+	paths, errc := walkFiles(done, a.InDir, a.OutDir, a.Ignore)
 
 	// Start a fixed number of goroutines to render files.
 	c := make(chan error)

@@ -1,7 +1,6 @@
-package schema
+package schemaParser
 
 import (
-	"encoding/json"
 	"errors"
 	"html/template"
 	"io"
@@ -11,94 +10,82 @@ import (
 	"strings"
 
 	"github.com/BurntSushi/toml"
-	"github.com/zackattackz/azure_static_site_kit/internal/statikit/config"
+	"github.com/zackattackz/azure_static_site_kit/internal/statikit/initializer"
 	sp "github.com/zackattackz/azure_static_site_kit/pkg/subtractPaths"
 )
 
-type Format uint
+type Interface interface {
+	Parse(*Map) error
+}
 
-type T struct {
+type Schema struct {
 	Data    map[string]any           // Variable names->raw data to be substituted, comes directly from schema
 	FileSub map[string]template.HTML // Variable names->html to be substituted, comes from a file
 }
 
-type parseT struct {
+type parseSchema struct {
 	Data    map[string]any    // Variable names->raw data to be substituted
 	FileSub map[string]string // Variable names->filename, relative to _statikit/.., that contains data to be substituted
 }
 
 // Maps path names to their data
-type Map map[string]T
+type Map map[string]Schema
 
-const (
-	JsonFormat Format = iota
-	TomlFormat
-
-	DataDirName     = "schema"
-	DefaultDataName = "_defaultvalues"
-)
-
-var extToFormat = map[string]Format{
-	".json": JsonFormat,
-	".toml": TomlFormat,
-}
-
-func parse(r io.Reader, format Format) (d parseT, err error) {
-	switch format {
-	case JsonFormat:
-		dec := json.NewDecoder(r)
-		err = dec.Decode(&d)
-	case TomlFormat:
-		dec := toml.NewDecoder(r)
-		_, err = dec.Decode(&d)
-	default:
-		err = errors.New("invalid format")
-	}
+func parse(r io.Reader) (d parseSchema, err error) {
+	dec := toml.NewDecoder(r)
+	_, err = dec.Decode(&d)
 	if d.Data == nil {
 		err = errors.New("parsed data is <nil>")
 	}
 	return
 }
 
-func Parse(root string) (Map, error) {
-	res := make(Map)
-	dataPath := filepath.Join(root, config.ConfigDirName, DataDirName)
+type t struct {
+	root string
+}
+
+func New(root string) Interface {
+	return &t{root: root}
+}
+
+func (t *t) Parse(m *Map) error {
+	dataPath := filepath.Join(t.root, initializer.StatikitDirName, initializer.SchemaDirName)
 	err := filepath.WalkDir(dataPath, func(path string, e fs.DirEntry, err error) error {
 		// Ensure there was no error in call
 		if err != nil {
 			return err
 		}
 
-		// Skip e if it is dir or non-regular
-		if e.IsDir() ||
-			!e.Type().IsRegular() {
-			return nil
-		}
-
 		// Determine path without extension, to be used to address res
 		pathFromData := sp.SubtractPaths(dataPath, path)
 		ext := filepath.Ext(pathFromData)
-		format := extToFormat[ext]
 		pathWithoutExt := strings.TrimSuffix(pathFromData, ext)
+
+		// Skip e if it is dir or non-regular or is not a .toml file
+		if e.IsDir() ||
+			!e.Type().IsRegular() ||
+			ext != ".toml" {
+			return nil
+		}
 
 		f, err := os.Open(path)
 		if err != nil {
 			return err
 		}
-		d, err := parse(f, format)
+		d, err := parse(f)
 		if err != nil {
 			return err
 		}
 
 		// Populate a new schema.T with the parsed fields
-		s := T{}
+		s := Schema{}
 		s.Data = d.Data
 		s.FileSub = make(map[string]template.HTML)
 
 		// Read all the files in FileSubst and
 		// fill out T's FileSubst with contents
 		for v, fname := range d.FileSub {
-			f, err := os.Open(filepath.Join(root, filepath.Clean(fname)))
+			f, err := os.Open(filepath.Join(t.root, filepath.Clean(fname)))
 			if err != nil {
 				return err
 			}
@@ -109,11 +96,8 @@ func Parse(root string) (Map, error) {
 			s.FileSub[v] = template.HTML(b)
 		}
 
-		res[pathWithoutExt] = s
+		(*m)[pathWithoutExt] = s
 		return nil
 	})
-	if err != nil {
-		return nil, err
-	}
-	return res, nil
+	return err
 }

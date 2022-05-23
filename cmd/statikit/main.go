@@ -6,8 +6,10 @@ import (
 	"path/filepath"
 
 	"github.com/zackattackz/azure_static_site_kit/cmd/statikit/preview"
+	"github.com/zackattackz/azure_static_site_kit/internal/statikit/configParser"
+	"github.com/zackattackz/azure_static_site_kit/internal/statikit/initializer"
 	"github.com/zackattackz/azure_static_site_kit/internal/statikit/previewer"
-	"github.com/zackattackz/azure_static_site_kit/internal/statikit/schema"
+	"github.com/zackattackz/azure_static_site_kit/internal/statikit/schemaParser"
 )
 
 func logErrAndExit(err error, code int) {
@@ -77,11 +79,22 @@ func main() {
 		// 	logErrAndExit(err, 1)
 		// }
 
-		schemaMap, err := schema.Parse(a.inDir)
+		schemaMap := make(schemaParser.Map)
+		parser := schemaParser.New(a.inDir)
+		err := parser.Parse(&schemaMap)
 		if err != nil {
 			logErrAndExit(err, 1)
 		}
 		a.schemaMap = schemaMap
+
+		cfgParser, err := configParser.New(a.inDir)
+		if err != nil {
+			logErrAndExit(err, 1)
+		}
+		cfg := configParser.Config{}
+		cfgParser.Parse(&cfg)
+		a.ignore = cfg.Ignore
+		a.ignore = append(a.ignore, initializer.StatikitDirName)
 
 		err = render(a)
 		if err != nil {

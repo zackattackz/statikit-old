@@ -5,9 +5,8 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/zackattackz/azure_static_site_kit/internal/statikit/config"
 	"github.com/zackattackz/azure_static_site_kit/internal/statikit/renderer"
-	"github.com/zackattackz/azure_static_site_kit/internal/statikit/schema"
+	"github.com/zackattackz/azure_static_site_kit/internal/statikit/schemaParser"
 )
 
 type renderArgs struct {
@@ -15,7 +14,8 @@ type renderArgs struct {
 	outDir        string
 	force         bool
 	rendererCount uint
-	schemaMap     schema.Map
+	schemaMap     schemaParser.Map
+	ignore        []string
 }
 
 func warnErase(outDir string) error {
@@ -59,8 +59,8 @@ func render(a renderArgs) error {
 		InDir:         a.inDir,
 		OutDir:        a.outDir,
 		RendererCount: a.rendererCount,
-		CfgDirName:    config.ConfigDirName,
 		SchemaMap:     a.schemaMap,
+		Ignore:        a.ignore,
 	}
 	return renderer.Run(rendererArgs)
 }

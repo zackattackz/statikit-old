@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/zackattackz/azure_static_site_kit/internal/statikit/config"
+	"github.com/zackattackz/azure_static_site_kit/internal/statikit/initializer"
 	"golang.org/x/term"
 )
 
@@ -39,7 +39,7 @@ func initialize(a initArgs) error {
 	}
 	fmt.Println()
 
-	err = config.Create(a.path, config.TomlFormat, string(pwd), key)
+	err = initializer.Create(a.path, string(pwd), key)
 	if err != nil {
 		// Delete outDir if it was made
 		os.RemoveAll(a.path)

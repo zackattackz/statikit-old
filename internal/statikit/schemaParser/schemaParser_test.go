@@ -1,4 +1,4 @@
-package schema
+package schemaParser
 
 import (
 	"html/template"
@@ -11,7 +11,7 @@ import (
 func TestParse(t *testing.T) {
 	expectedMap := map[string]Map{
 		"one": {
-			"blog": T{
+			"blog": Schema{
 				Data: map[string]any{
 					"TestOne": "TestOne",
 					"TestTwo": int64(2),
@@ -20,13 +20,13 @@ func TestParse(t *testing.T) {
 			},
 		},
 		"two": {
-			"blog": T{
+			"blog": Schema{
 				Data: map[string]any{
 					"TestOne": int64(100),
 				},
 				FileSub: map[string]template.HTML{},
 			},
-			filepath.Join("folder", "nested"): T{
+			filepath.Join("folder", "nested"): Schema{
 				Data: map[string]any{
 					"NestedTest": "Nested",
 				},
@@ -34,40 +34,40 @@ func TestParse(t *testing.T) {
 			},
 		},
 		"three": {
-			"blog": T{
+			"blog": Schema{
 				Data: map[string]any{
 					"BlogStuff": "Hi There",
 				},
 				FileSub: map[string]template.HTML{},
 			},
-			filepath.Join("another", "another.testing"): T{
+			filepath.Join("another", "another.testing"): Schema{
 				Data: map[string]any{
 					"SomeMore": "Stuff",
 				},
 				FileSub: map[string]template.HTML{},
 			},
-			filepath.Join("folder", "nested"): T{
+			filepath.Join("folder", "nested"): Schema{
 				Data: map[string]any{
 					"NestedTest": "Nested",
 				},
 				FileSub: map[string]template.HTML{},
 			},
-			filepath.Join("folder", "blog"): T{
+			filepath.Join("folder", "blog"): Schema{
 				Data: map[string]any{"JsonBlog": "HelloWorld",
 					"Title": "Title",
 					"Date":  "Today",
 				},
 				FileSub: map[string]template.HTML{},
 			},
-			filepath.Join("folder", "deep", "status"): T{
-				Data: map[string]any{"Likes": float64(100),
+			filepath.Join("folder", "deep", "status"): Schema{
+				Data: map[string]any{"Likes": int64(100),
 					"Person": "Jesus",
 				},
 				FileSub: map[string]template.HTML{},
 			},
 		},
 		"four": {
-			"blog": T{
+			"blog": Schema{
 				Data: map[string]any{
 					"TestOne": "TestOne",
 					"TestTwo": int64(2),
@@ -92,7 +92,9 @@ func TestParse(t *testing.T) {
 	}
 	for _, e := range e {
 		in := filepath.Join(in, e.Name())
-		actual, err := Parse(in)
+		schmaParser := New(in)
+		actual := make(Map)
+		err := schmaParser.Parse(&actual)
 		if err != nil {
 			t.Fatal(err)
 		}

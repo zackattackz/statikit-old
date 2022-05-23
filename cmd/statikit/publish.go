@@ -5,7 +5,7 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/zackattackz/azure_static_site_kit/internal/statikit/config"
+	"github.com/zackattackz/azure_static_site_kit/internal/statikit/initializer"
 	"github.com/zackattackz/azure_static_site_kit/internal/statikit/publisher"
 	"github.com/zackattackz/azure_static_site_kit/pkg/secret"
 	"golang.org/x/term"
@@ -16,7 +16,7 @@ type publishArgs struct {
 }
 
 func publish(a publishArgs) error {
-	aes, err := os.ReadFile(filepath.Join(a.path, config.KeyFileName))
+	aes, err := os.ReadFile(filepath.Join(a.path, initializer.KeyFileName))
 	if err != nil {
 		return err
 	}
