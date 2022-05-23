@@ -10,7 +10,7 @@ import (
 	"testing"
 
 	"github.com/zackattackz/azure_static_site_kit/internal/statikit/configParser"
-	"github.com/zackattackz/azure_static_site_kit/internal/statikit/schema"
+	"github.com/zackattackz/azure_static_site_kit/internal/statikit/schemaParser"
 	sp "github.com/zackattackz/azure_static_site_kit/pkg/subtractPaths"
 )
 
@@ -119,7 +119,9 @@ func TestRun(t *testing.T) {
 			t.Fatalf("couldn't parse config file: %v", err)
 		}
 
-		schemaMap, err := schema.Parse(in)
+		schmaParser := schemaParser.New(in)
+		schemaMap := make(schemaParser.Map)
+		err = schmaParser.Parse(&schemaMap)
 		if err != nil {
 			t.Fatalf("couldn't parse schema dir: %s %v", in, err)
 		}
@@ -128,7 +130,6 @@ func TestRun(t *testing.T) {
 			InDir:         in,
 			OutDir:        out,
 			RendererCount: 20,
-			CfgDirName:    configParser.ConfigDirName,
 			SchemaMap:     schemaMap,
 			Ignore:        cfg.Ignore,
 		}
