@@ -170,8 +170,8 @@ func New(a Args) Renderer {
 // duplicating the all directories and files into `a.OutDir`.
 // Except for any encountered "*.gohtml" files,
 // which will be rendered as html.
-func (t *renderer) Render() error {
-	if t.RendererCount < 1 {
+func (r *renderer) Render() error {
+	if r.RendererCount < 1 {
 		return fmt.Errorf("a.RendererCount must be >= 1")
 	}
 
@@ -181,15 +181,15 @@ func (t *renderer) Render() error {
 	defer close(done)
 
 	// Start the file walking goroutine
-	paths, errc := walkFiles(done, t.InDir, t.OutDir, t.Ignore)
+	paths, errc := walkFiles(done, r.InDir, r.OutDir, r.Ignore)
 
 	// Start a fixed number of goroutines to render files.
 	c := make(chan error)
 	var wg sync.WaitGroup
-	wg.Add(int(t.RendererCount))
-	for i := 0; i < int(t.RendererCount); i++ {
+	wg.Add(int(r.RendererCount))
+	for i := 0; i < int(r.RendererCount); i++ {
 		go func() {
-			renderWorker(done, paths, t.SchemaMap, t.InDir, c)
+			renderWorker(done, paths, r.SchemaMap, r.InDir, c)
 			wg.Done()
 		}()
 	}
