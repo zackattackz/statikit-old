@@ -34,6 +34,6 @@ func publish(a publishArgs) error {
 	}
 
 	publisherArgs := publisher.Args{Path: a.path, Key: string(key)}
-	uploader := publisher.NewUploader(publisherArgs)
-	return uploader.Upload()
+	p := publisher.New(publisherArgs)
+	return p.Publish()
 }

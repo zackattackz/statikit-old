@@ -6,8 +6,8 @@ import (
 	"github.com/Azure/azure-sdk-for-go/sdk/storage/azblob"
 )
 
-type Interface interface {
-	Upload() error
+type Publisher interface {
+	Publish() error
 }
 
 type Args struct {
@@ -17,16 +17,16 @@ type Args struct {
 	Key           string // Storage account access key
 }
 
-type uploader struct {
+type publisher struct {
 	Args
 }
 
-func NewUploader(a Args) Interface {
-	return &uploader{a}
+func New(a Args) Publisher {
+	return &publisher{a}
 }
 
-func (u *uploader) Upload() error {
-	cred, err := azblob.NewSharedKeyCredential(u.AccountName, u.Key)
+func (p *publisher) Publish() error {
+	cred, err := azblob.NewSharedKeyCredential(p.AccountName, p.Key)
 	if err != nil {
 		return err
 	}
@@ -34,8 +34,8 @@ func (u *uploader) Upload() error {
 	client, err := azblob.NewContainerClientWithSharedKey(
 		fmt.Sprintf(
 			"https://%s.blob.core.windows.net/%s",
-			u.AccountName,
-			u.ContainerName,
+			p.AccountName,
+			p.ContainerName,
 		),
 		cred,
 		nil,
