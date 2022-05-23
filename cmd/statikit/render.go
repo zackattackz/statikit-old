@@ -62,6 +62,6 @@ func render(a renderArgs) error {
 		SchemaMap:     a.schemaMap,
 		Ignore:        a.ignore,
 	}
-	runner := renderer.NewRunner(rendererArgs)
-	return runner.Run()
+	r := renderer.New(rendererArgs)
+	return r.Render()
 }

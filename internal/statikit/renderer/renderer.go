@@ -18,8 +18,8 @@ import (
 	sp "github.com/zackattackz/azure_static_site_kit/pkg/subtractPaths"
 )
 
-type Interface interface {
-	Run() error
+type Renderer interface {
+	Render() error
 }
 
 // Arguments to statikit.Render
@@ -65,9 +65,9 @@ func render(p inOutPath, dataMap schema.Map, baseIn string) error {
 	return t.Execute(fOut, d)
 }
 
-// renderer reads in/out paths from `paths` and sends result of rendering
+// renderWorker reads in/out paths from `paths` and sends result of rendering
 // to `c` until either `paths` or `done` is closed.
-func renderer(done <-chan struct{}, paths <-chan inOutPath, dataMap schema.Map, baseIn string, c chan error) {
+func renderWorker(done <-chan struct{}, paths <-chan inOutPath, dataMap schema.Map, baseIn string, c chan error) {
 	for p := range paths {
 		select {
 		case c <- render(p, dataMap, baseIn):
@@ -158,19 +158,19 @@ func walkFiles(done <-chan struct{}, baseIn, baseOut string, ignore []string) (<
 	return paths, errc
 }
 
-type renderRunner struct {
+type renderer struct {
 	Args
 }
 
-func NewRunner(a Args) Interface {
-	return &renderRunner{a}
+func New(a Args) Renderer {
+	return &renderer{a}
 }
 
 // Orchestrates a pipeline that walks `a.InDir`,
 // duplicating the all directories and files into `a.OutDir`.
 // Except for any encountered "*.gohtml" files,
 // which will be rendered as html.
-func (t *renderRunner) Run() error {
+func (t *renderer) Render() error {
 	if t.RendererCount < 1 {
 		return fmt.Errorf("a.RendererCount must be >= 1")
 	}
@@ -189,7 +189,7 @@ func (t *renderRunner) Run() error {
 	wg.Add(int(t.RendererCount))
 	for i := 0; i < int(t.RendererCount); i++ {
 		go func() {
-			renderer(done, paths, t.SchemaMap, t.InDir, c)
+			renderWorker(done, paths, t.SchemaMap, t.InDir, c)
 			wg.Done()
 		}()
 	}

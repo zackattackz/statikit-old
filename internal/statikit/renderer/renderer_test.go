@@ -136,8 +136,8 @@ func TestRun(t *testing.T) {
 		}
 		args.Ignore = append(args.Ignore, initializer.StatikitDirName)
 
-		runner := NewRunner(args)
-		err = runner.Run()
+		r := New(args)
+		err = r.Render()
 		if err != nil {
 			t.Fatalf("error on Render(%v): %s", args, err)
 		}
