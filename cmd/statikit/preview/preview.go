@@ -7,6 +7,6 @@ type Args struct {
 	port string
 }
 
-func Run(p previewer.Interface) error {
+func Run(p previewer.Previewer) error {
 	return p.Preview()
 }

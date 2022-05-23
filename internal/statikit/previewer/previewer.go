@@ -5,20 +5,20 @@ import (
 	"net/http"
 )
 
-type Interface interface {
+type Previewer interface {
 	Preview() error
 }
 
-type T struct {
+type previewer struct {
 	path string
 	port string
 }
 
-func New(path, port string) Interface {
-	return &T{path: path, port: port}
+func New(path, port string) Previewer {
+	return &previewer{path: path, port: port}
 }
 
-func (t *T) Preview() error {
+func (t *previewer) Preview() error {
 	http.Handle("/", http.FileServer(http.Dir(t.path)))
 	fmt.Printf("Previewing contents of %s\n", t.path)
 	fmt.Println("Listening on port " + t.port)
