@@ -8,6 +8,8 @@ import (
 	"github.com/zackattackz/azure_static_site_kit/pkg/secret"
 )
 
+type InitStatikitProjectFunc func(path string, pwd string, key []byte) error
+
 const (
 	StatikitDirName = "_statikit"
 	ConfigFileName  = "config.toml"
@@ -16,7 +18,7 @@ const (
 	DefaultDataName = "_defaultvalues"
 )
 
-func Create(path string, pwd string, key []byte) error {
+func InitStatikitProject(path string, pwd string, key []byte) error {
 
 	_, err := os.Stat(path)
 	if err == nil {

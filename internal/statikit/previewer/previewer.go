@@ -5,22 +5,16 @@ import (
 	"net/http"
 )
 
-type Previewer interface {
-	Preview() error
+type Args struct {
+	Path string
+	Port string
 }
 
-type previewer struct {
-	path string
-	port string
-}
+type PreviewFunc func(Args) error
 
-func New(path, port string) Previewer {
-	return &previewer{path: path, port: port}
-}
-
-func (t *previewer) Preview() error {
-	http.Handle("/", http.FileServer(http.Dir(t.path)))
-	fmt.Printf("Previewing contents of %s\n", t.path)
-	fmt.Println("Listening on port " + t.port)
-	return http.ListenAndServe(t.port, nil)
+func Preview(a Args) error {
+	http.Handle("/", http.FileServer(http.Dir(a.Path)))
+	fmt.Printf("Previewing contents of %s\n", a.Path)
+	fmt.Println("Listening on port " + a.Port)
+	return http.ListenAndServe(a.Port, nil)
 }

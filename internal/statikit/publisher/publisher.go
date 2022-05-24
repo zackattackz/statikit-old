@@ -6,9 +6,7 @@ import (
 	"github.com/Azure/azure-sdk-for-go/sdk/storage/azblob"
 )
 
-type Publisher interface {
-	Publish() error
-}
+type PublishFunc func(Args) error
 
 type Args struct {
 	Path          string // Path to directory to publish
@@ -17,16 +15,8 @@ type Args struct {
 	Key           string // Storage account access key
 }
 
-type publisher struct {
-	Args
-}
-
-func New(a Args) Publisher {
-	return &publisher{a}
-}
-
-func (p *publisher) Publish() error {
-	cred, err := azblob.NewSharedKeyCredential(p.AccountName, p.Key)
+func Publish(a Args) error {
+	cred, err := azblob.NewSharedKeyCredential(a.AccountName, a.Key)
 	if err != nil {
 		return err
 	}
@@ -34,8 +24,8 @@ func (p *publisher) Publish() error {
 	client, err := azblob.NewContainerClientWithSharedKey(
 		fmt.Sprintf(
 			"https://%s.blob.core.windows.net/%s",
-			p.AccountName,
-			p.ContainerName,
+			a.AccountName,
+			a.ContainerName,
 		),
 		cred,
 		nil,

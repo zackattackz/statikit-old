@@ -18,9 +18,7 @@ import (
 	sp "github.com/zackattackz/azure_static_site_kit/pkg/subtractPaths"
 )
 
-type Renderer interface {
-	Render() error
-}
+type RenderFunc func(Args) error
 
 // Arguments to statikit.Render
 type Args struct {
@@ -158,20 +156,12 @@ func walkFiles(done <-chan struct{}, baseIn, baseOut string, ignore []string) (<
 	return paths, errc
 }
 
-type renderer struct {
-	Args
-}
-
-func New(a Args) Renderer {
-	return &renderer{a}
-}
-
 // Orchestrates a pipeline that walks `a.InDir`,
 // duplicating the all directories and files into `a.OutDir`.
 // Except for any encountered "*.gohtml" files,
 // which will be rendered as html.
-func (r *renderer) Render() error {
-	if r.RendererCount < 1 {
+func Render(a Args) error {
+	if a.RendererCount < 1 {
 		return fmt.Errorf("a.RendererCount must be >= 1")
 	}
 
@@ -181,15 +171,15 @@ func (r *renderer) Render() error {
 	defer close(done)
 
 	// Start the file walking goroutine
-	paths, errc := walkFiles(done, r.InDir, r.OutDir, r.Ignore)
+	paths, errc := walkFiles(done, a.InDir, a.OutDir, a.Ignore)
 
 	// Start a fixed number of goroutines to render files.
 	c := make(chan error)
 	var wg sync.WaitGroup
-	wg.Add(int(r.RendererCount))
-	for i := 0; i < int(r.RendererCount); i++ {
+	wg.Add(int(a.RendererCount))
+	for i := 0; i < int(a.RendererCount); i++ {
 		go func() {
-			renderWorker(done, paths, r.SchemaMap, r.InDir, c)
+			renderWorker(done, paths, a.SchemaMap, a.InDir, c)
 			wg.Done()
 		}()
 	}
