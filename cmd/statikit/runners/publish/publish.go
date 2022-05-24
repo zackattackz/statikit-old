@@ -14,9 +14,9 @@ import (
 )
 
 func Runner(publish publisher.PublishFunc) runners.Runner {
-	return func(args []string) error {
+	return func(args []string, usageFor runners.UsageForFunc) error {
 		if len(args) < 3 {
-			usage.PrintUsageAndExit(args[0], usage.Publish, nil)
+			usageFor(usage.Publish)()
 		}
 
 		inDir := filepath.Clean(args[2])

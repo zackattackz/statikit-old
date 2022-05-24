@@ -15,6 +15,39 @@ import (
 	"github.com/zackattackz/azure_static_site_kit/internal/statikit/schema"
 )
 
+var FlagSet *flag.FlagSet
+
+var outDir, inDir string
+var force bool
+var rendererCount uint
+
+// Initialize FlagSet
+func init() {
+	const (
+		// flags
+		outFlag           = "o"
+		forceFlag         = "f"
+		rendererCountFlag = "renderer-count"
+
+		// default flag values
+		defaultForce         = false
+		defaultRendererCount = 20
+
+		// flag descriptions
+		descOut           = "rendered output directory"
+		descForce         = "force output directory removal"
+		descRendererCount = "how many renderer goroutines to be made"
+	)
+
+	FlagSet = flag.NewFlagSet(string(usage.Render), flag.ExitOnError)
+	defaultOut := filepath.Join(os.TempDir(), "statikitRendered")
+
+	FlagSet.StringVar(&outDir, outFlag, defaultOut, descOut)
+	FlagSet.BoolVar(&force, forceFlag, defaultForce, descForce)
+	FlagSet.UintVar(&rendererCount, rendererCountFlag, defaultRendererCount, descRendererCount)
+
+}
+
 func warnErase(outDir string) error {
 	fmt.Printf("WARNING!! OK to delete everything inside %v y/[n]: ", outDir)
 	bio := bufio.NewReader(os.Stdin)
@@ -29,45 +62,17 @@ func warnErase(outDir string) error {
 }
 
 func Runner(render renderer.RenderFunc) runners.Runner {
-	return func(args []string) error {
-		flagSet := flag.NewFlagSet(string(usage.Render), flag.ExitOnError)
-		flagSet.Usage = func() {
-			usage.PrintUsageAndExit(args[0], usage.Render, flagSet)
-		}
+	return func(args []string, usageFor runners.UsageForFunc) error {
+		FlagSet.Usage = usageFor(usage.Render)
 
-		const (
-			// flags
-			outFlag           = "o"
-			forceFlag         = "f"
-			rendererCountFlag = "renderer-count"
+		FlagSet.Parse(args[2:])
 
-			// default flag values
-			defaultForce         = false
-			defaultRendererCount = 20
-
-			// flag descriptions
-			descOut           = "rendered output directory"
-			descForce         = "force output directory removal"
-			descRendererCount = "how many renderer goroutines to be made"
-		)
-
-		defaultOut := filepath.Join(os.TempDir(), "statikitRendered")
-		var outDir, inDir string
-		var force bool
-		var rendererCount uint
-
-		flagSet.StringVar(&outDir, outFlag, defaultOut, descOut)
-		flagSet.BoolVar(&force, forceFlag, defaultForce, descForce)
-		flagSet.UintVar(&rendererCount, rendererCountFlag, defaultRendererCount, descRendererCount)
-
-		flagSet.Parse(args[2:])
-
-		if flagSet.NArg() > 1 {
-			flagSet.Usage()
+		if FlagSet.NArg() > 1 {
+			usageFor(usage.Render)()
 		}
 
 		// Initialize inDir to (optionally) first non-flag arg
-		inDir = flagSet.Arg(0)
+		inDir = FlagSet.Arg(0)
 		if inDir == "" {
 			inDir = "."
 		}

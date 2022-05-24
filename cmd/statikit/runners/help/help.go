@@ -1,17 +1,19 @@
 package help
 
-import "github.com/zackattackz/azure_static_site_kit/cmd/statikit/usage"
+import (
+	"github.com/zackattackz/azure_static_site_kit/cmd/statikit/runners"
+	"github.com/zackattackz/azure_static_site_kit/cmd/statikit/usage"
+)
 
-func Runner(args []string) error {
+func Runner(args []string, usageFor runners.UsageForFunc) error {
 	if len(args) > 3 ||
 		len(args) < 3 {
-		usage.PrintUsageAndExit(args[0], usage.Help, nil)
+		usageFor(usage.Help)()
 	}
 	m := args[2]
 	if usage.IsMode(usage.Mode(m)) {
-		usage.PrintUsageAndExit(args[0], usage.Mode(m), nil) // TODO use specific flagset for mode
-
+		usageFor(usage.Mode(m))()
 	}
-	usage.PrintUsageAndExit(args[0], usage.Help, nil)
+	usageFor(usage.Help)()
 	return nil
 }

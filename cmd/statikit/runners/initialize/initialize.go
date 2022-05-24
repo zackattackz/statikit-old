@@ -11,9 +11,9 @@ import (
 )
 
 func Runner(init initializer.InitStatikitProjectFunc) runners.Runner {
-	return func(args []string) error {
+	return func(args []string, usageFor runners.UsageForFunc) error {
 		if len(args) < 3 {
-			usage.PrintUsageAndExit(args[0], usage.Init, nil)
+			usageFor(usage.Init)()
 		}
 
 		outDir := args[2]

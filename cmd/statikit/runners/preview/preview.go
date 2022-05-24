@@ -9,9 +9,9 @@ import (
 )
 
 func Runner(preview previewer.PreviewFunc) runners.Runner {
-	return func(args []string) error {
+	return func(args []string, usageFor runners.UsageForFunc) error {
 		if len(args) < 3 {
-			usage.PrintUsageAndExit(args[0], usage.Preview, nil)
+			usageFor(usage.Preview)()
 		}
 
 		inDir := filepath.Clean(args[2])
