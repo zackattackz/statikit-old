@@ -1,7 +1,6 @@
 package main
 
 import (
-	"flag"
 	"fmt"
 	"os"
 	"path/filepath"
@@ -20,8 +19,8 @@ import (
 )
 
 type mainDependencies struct {
-	modeToRunner  map[usage.Mode]runners.Runner
-	modeToFlagSet map[usage.Mode]flag.FlagSet
+	modeToRunner        map[usage.Mode]runners.Runner
+	modeToPrintDefaults map[usage.Mode]func()
 }
 
 func logErrAndExit(err error, code int) {
@@ -41,7 +40,13 @@ func runMain(args []string, deps mainDependencies) {
 		usage.PrintUsageAndExit(cmdName, usage.Invalid, nil)
 	}
 
-	err := deps.modeToRunner[m](os.Args)
+	usageForFunc := func(m usage.Mode) func() {
+		return func() {
+			usage.PrintUsageAndExit(cmdName, m, deps.modeToPrintDefaults)
+		}
+	}
+
+	err := deps.modeToRunner[m](os.Args, usageForFunc)
 	if err != nil {
 		logErrAndExit(err, 1)
 	} else {
@@ -57,6 +62,9 @@ func main() {
 			usage.Publish: publish.Runner(publisher.Publish),
 			usage.Init:    initialize.Runner(initializer.InitStatikitProject),
 			usage.Help:    help.Runner,
+		},
+		modeToPrintDefaults: map[usage.Mode]func(){
+			usage.Render: render.FlagSet.PrintDefaults,
 		},
 	}
 	runMain(os.Args, deps)

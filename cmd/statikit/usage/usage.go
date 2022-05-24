@@ -1,9 +1,9 @@
 package usage
 
 import (
-	"flag"
 	"fmt"
 	"os"
+	"path/filepath"
 )
 
 type Mode string
@@ -31,9 +31,10 @@ func IsMode(m Mode) (exists bool) {
 	return
 }
 
-func PrintUsageAndExit(cmdName string, m Mode, flagSet *flag.FlagSet) {
+func PrintUsageAndExit(cmdName string, m Mode, modeToPrintDefaults map[Mode]func()) {
 
 	var opts string
+	_, cmdName = filepath.Split(cmdName)
 	usageFmtStr := "usage: %s %s %s"
 	allModes := fmt.Sprintf("[%s | %s | %s | %s | %s]", Render, Preview, Publish, Init, Help)
 	allModesButHelp := allModes[:len(allModes)-len(Help)-4] + "]"
@@ -54,10 +55,11 @@ func PrintUsageAndExit(cmdName string, m Mode, flagSet *flag.FlagSet) {
 	default:
 		panic(fmt.Sprintf("invalid mode: %s", m))
 	}
+
 	usageStr := fmt.Sprintf(usageFmtStr, cmdName, m, opts)
 	fmt.Fprintln(os.Stderr, usageStr)
-	if flagSet != nil {
-		flagSet.PrintDefaults()
+	if printDefaults, ok := modeToPrintDefaults[m]; ok {
+		printDefaults()
 	}
 	os.Exit(2)
 }
