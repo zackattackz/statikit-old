@@ -1,16 +1,50 @@
 package schema
 
 import (
+	"fmt"
 	"html/template"
-	"os"
 	"path/filepath"
 	"reflect"
 	"testing"
+
+	"github.com/spf13/afero"
+	"github.com/zackattackz/azure_static_site_kit/internal/statikit/initializer"
 )
 
 func TestParse(t *testing.T) {
-	expectedMap := map[string]Map{
-		"one": {
+	type pathAndContents struct {
+		path     string
+		ext      string
+		contents string
+	}
+
+	testInputs := [][]pathAndContents{
+		{
+			{"blog", "toml", "[Data]\nTestOne = \"TestOne\"\nTestTwo = 2"},
+		},
+		{
+			{"blog", "toml", "[Data]\nTestOne = 100"},
+			{filepath.Join("folder", "nested"), "toml", "[Data]\nNestedTest = \"Nested\""},
+		},
+		{
+			{"blog", "toml", "[Data]\nBlogStuff = \"Hi There\""},
+			{filepath.Join("folder", "nested"), "toml", "[Data]\nNestedTest = \"Nested\""},
+			{filepath.Join("folder", "blog"), "toml", "[Data]\nJsonBlog = \"HelloWorld\"\nTitle = \"Title\"\nDate = \"Today\""},
+			{filepath.Join("folder", "deep", "status"), "toml", "[Data]\nLikes = 100\nPerson = \"Jesus\""},
+			{filepath.Join("another", "another.testing"), "toml", "[Data]\nSomeMore = \"Stuff\""},
+		},
+		{
+			{"blog", "toml", "[Data]\nTestOne = \"TestOne\"\nTestTwo = 2\n[FileSub]\nHead = \"templates/head.html\""},
+			{filepath.Join("templates", "head"), "html", "<head><title>Hello World</title></head>"},
+		},
+		{
+			{initializer.DefaultDataName, "toml", "[Data]\nTitle = \"One\""},
+		},
+	}
+
+	expectedResults := []Map{
+
+		{
 			"blog": T{
 				Data: map[string]any{
 					"TestOne": "TestOne",
@@ -19,7 +53,7 @@ func TestParse(t *testing.T) {
 				FileSub: map[string]template.HTML{},
 			},
 		},
-		"two": {
+		{
 			"blog": T{
 				Data: map[string]any{
 					"TestOne": int64(100),
@@ -33,7 +67,7 @@ func TestParse(t *testing.T) {
 				FileSub: map[string]template.HTML{},
 			},
 		},
-		"three": {
+		{
 			"blog": T{
 				Data: map[string]any{
 					"BlogStuff": "Hi There",
@@ -66,7 +100,7 @@ func TestParse(t *testing.T) {
 				FileSub: map[string]template.HTML{},
 			},
 		},
-		"four": {
+		{
 			"blog": T{
 				Data: map[string]any{
 					"TestOne": "TestOne",
@@ -77,29 +111,49 @@ func TestParse(t *testing.T) {
 				},
 			},
 		},
+		{
+			initializer.DefaultDataName: T{
+				Data: map[string]any{
+					"Title": "One",
+				},
+				FileSub: map[string]template.HTML{},
+			},
+		},
 	}
 
-	wd, err := os.Getwd()
-	if err != nil {
-		t.Fatalf("error on os.Getwd(): %s", err)
-	}
-	testcasesPath := filepath.Join(wd, "testcases")
-	in := filepath.Join(testcasesPath, "in")
+	fs := afero.NewMemMapFs()
 
-	e, err := os.ReadDir(in)
-	if err != nil {
-		t.Fatal(err)
+	for i, testInput := range testInputs {
+
+		for _, f := range testInput {
+			var fpath string
+			if f.ext == "toml" {
+				fpath = filepath.Join(fmt.Sprint(i), initializer.StatikitDirName, initializer.SchemaDirName, f.path+"."+f.ext)
+			} else {
+				fpath = filepath.Join(fmt.Sprint(i), f.path+"."+f.ext)
+			}
+			dname, _ := filepath.Split(fpath)
+			err := fs.MkdirAll(dname, 0755)
+			if err != nil {
+				t.Fatalf("error creating test input directory: %s, %v", dname, err)
+			}
+			err = afero.WriteFile(fs, fpath, []byte(f.contents), 0755)
+			if err != nil {
+				t.Fatalf("error creating test input file: %s, %v", fpath, err)
+			}
+		}
 	}
-	for _, e := range e {
-		in := filepath.Join(in, e.Name())
-		schemaParser := NewParser(in)
+
+	for i, expectedResult := range expectedResults {
+		testName := fmt.Sprint(i)
+		schemaParser := NewParser(fs, testName)
 		actual := make(Map)
 		err := schemaParser.Parse(&actual)
 		if err != nil {
 			t.Fatal(err)
 		}
-		if !reflect.DeepEqual(actual, expectedMap[e.Name()]) {
-			t.Fatalf("expected %v, actual %v", expectedMap[e.Name()], actual)
+		if !reflect.DeepEqual(actual, expectedResult) {
+			t.Fatalf("expected %v, actual %v", expectedResult, actual)
 		}
 	}
 }

@@ -7,6 +7,7 @@ import (
 	"os"
 	"path/filepath"
 
+	"github.com/spf13/afero"
 	"github.com/zackattackz/azure_static_site_kit/cmd/statikit/runners"
 	"github.com/zackattackz/azure_static_site_kit/cmd/statikit/usage"
 	"github.com/zackattackz/azure_static_site_kit/internal/statikit/config"
@@ -61,8 +62,10 @@ func warnErase(outDir string) error {
 	return fmt.Errorf("removal of %v not confirmed", outDir)
 }
 
-func Runner(render renderer.RenderFunc) runners.Runner {
-	return func(args []string, usageFor runners.UsageForFunc) error {
+type renderFunc func(renderer.Args) error
+
+func Runner(render renderFunc) runners.Runner {
+	return func(fs afero.Fs, args []string, usageFor runners.UsageForFunc) error {
 		FlagSet.Usage = usageFor(usage.Render)
 
 		FlagSet.Parse(args[2:])
@@ -82,7 +85,7 @@ func Runner(render renderer.RenderFunc) runners.Runner {
 		outDir = filepath.Clean(outDir)
 
 		// Ensure in dir exists and is a dir
-		inDirStat, err := os.Stat(inDir)
+		inDirStat, err := fs.Stat(inDir)
 		if err != nil {
 			return fmt.Errorf("couldn't read %s: %w", inDir, err)
 		}
@@ -96,22 +99,21 @@ func Runner(render renderer.RenderFunc) runners.Runner {
 				return err
 			}
 		}
-
 		// If we make it here, erase outdir
-		if err := os.RemoveAll(outDir); err != nil {
+		if err := fs.RemoveAll(outDir); err != nil {
 			return err
 		}
 
 		// Parse the schema map
 		schemaMap := make(schema.Map)
-		schemaParser := schema.NewParser(inDir)
+		schemaParser := schema.NewParser(fs, inDir)
 		err = schemaParser.Parse(&schemaMap)
 		if err != nil {
 			return err
 		}
 
 		// Parse the config
-		cfgParser, err := config.NewParser(inDir)
+		cfgParser, err := config.NewParser(fs, inDir)
 		if err != nil {
 			return err
 		}
@@ -126,6 +128,7 @@ func Runner(render renderer.RenderFunc) runners.Runner {
 			RendererCount: rendererCount,
 			SchemaMap:     schemaMap,
 			Ignore:        cfg.Ignore,
+			Fs:            fs,
 		}
 		return render(rendererArgs)
 	}

@@ -5,6 +5,7 @@ import (
 	"os"
 	"path/filepath"
 
+	"github.com/spf13/afero"
 	"github.com/zackattackz/azure_static_site_kit/cmd/statikit/runners"
 	"github.com/zackattackz/azure_static_site_kit/cmd/statikit/usage"
 	"github.com/zackattackz/azure_static_site_kit/internal/statikit/initializer"
@@ -13,8 +14,10 @@ import (
 	"golang.org/x/term"
 )
 
-func Runner(publish publisher.PublishFunc) runners.Runner {
-	return func(args []string, usageFor runners.UsageForFunc) error {
+type publishFunc func(publisher.Args) error
+
+func Runner(publish publishFunc) runners.Runner {
+	return func(fs afero.Fs, args []string, usageFor runners.UsageForFunc) error {
 		if len(args) < 3 {
 			usageFor(usage.Publish)()
 		}

@@ -8,17 +8,15 @@ import (
 	"html/template"
 	"io"
 	"io/fs"
-	"os"
 	"path/filepath"
 	"strings"
 	"sync"
 
+	"github.com/spf13/afero"
 	"github.com/zackattackz/azure_static_site_kit/internal/statikit/initializer"
 	"github.com/zackattackz/azure_static_site_kit/internal/statikit/schema"
 	sp "github.com/zackattackz/azure_static_site_kit/pkg/subtractPaths"
 )
-
-type RenderFunc func(Args) error
 
 // Arguments to statikit.Render
 type Args struct {
@@ -27,6 +25,7 @@ type Args struct {
 	RendererCount uint       // # of renderer goroutines
 	SchemaMap     schema.Map // Scehma passed to template.Execute
 	Ignore        []string   // Filepath globs to ignore when walking
+	Fs            afero.Fs
 }
 
 // Combination of input/output paths
@@ -36,14 +35,14 @@ type inOutPath struct {
 }
 
 // Render the template at `p.in` to `p.out`, providing `data`
-func render(p inOutPath, dataMap schema.Map, baseIn string) error {
-	fOut, err := os.Create(p.out)
+func render(fs afero.Fs, p inOutPath, dataMap schema.Map, baseIn string) error {
+	fOut, err := fs.Create(p.out)
 	if err != nil {
 		return err
 	}
 	defer fOut.Close()
 
-	b, err := os.ReadFile(p.in)
+	b, err := afero.ReadFile(fs, p.in)
 	if err != nil {
 		return err
 	}
@@ -65,10 +64,10 @@ func render(p inOutPath, dataMap schema.Map, baseIn string) error {
 
 // renderWorker reads in/out paths from `paths` and sends result of rendering
 // to `c` until either `paths` or `done` is closed.
-func renderWorker(done <-chan struct{}, paths <-chan inOutPath, dataMap schema.Map, baseIn string, c chan error) {
+func renderWorker(done <-chan struct{}, paths <-chan inOutPath, fs afero.Fs, dataMap schema.Map, baseIn string, c chan error) {
 	for p := range paths {
 		select {
-		case c <- render(p, dataMap, baseIn):
+		case c <- render(fs, p, dataMap, baseIn):
 		case <-done:
 			return
 		}
@@ -79,14 +78,14 @@ func renderWorker(done <-chan struct{}, paths <-chan inOutPath, dataMap schema.M
 // in/out path of each "*.gohtml" file on `paths`.  It sends the result of the
 // walk on the error channel.  If done is closed, walkFiles abandons its work.
 // It copies directories and other regular files from in to out as it walks.
-func walkFiles(done <-chan struct{}, baseIn, baseOut string, ignore []string) (<-chan inOutPath, <-chan error) {
+func walkFiles(done <-chan struct{}, walkFs afero.Fs, baseIn, baseOut string, ignore []string) (<-chan inOutPath, <-chan error) {
 	paths := make(chan inOutPath)
 	errc := make(chan error, 1)
 	go func() {
 		// Close the paths channel after Walk returns.
 		defer close(paths)
 		// No select needed for this send, since errc is buffered.
-		errc <- filepath.Walk(baseIn, func(path string, info os.FileInfo, err error) error {
+		errc <- afero.Walk(walkFs, baseIn, func(path string, info fs.FileInfo, err error) error {
 			if err != nil {
 				return err
 			}
@@ -110,7 +109,7 @@ func walkFiles(done <-chan struct{}, baseIn, baseOut string, ignore []string) (<
 
 			// If it's a directory, create that directory in baseOut/prefix
 			if info.IsDir() {
-				return os.Mkdir(fullOut, 0755)
+				return walkFs.Mkdir(fullOut, 0755)
 			}
 
 			// If not a directory or regular, error out
@@ -121,13 +120,13 @@ func walkFiles(done <-chan struct{}, baseIn, baseOut string, ignore []string) (<
 			// Otherwise, check if the file ends in ".gohtml"
 			if filepath.Ext(fullIn) != ".gohtml" {
 				// If it doesn't, copy file contents from `fullIn` to `fullOut`
-				fIn, err := os.Open(fullIn)
+				fIn, err := walkFs.Open(fullIn)
 				if err != nil {
 					return err
 				}
 				defer fIn.Close()
 
-				fOut, err := os.Create(fullOut)
+				fOut, err := walkFs.Create(fullOut)
 				if err != nil {
 					return err
 				}
@@ -171,7 +170,7 @@ func Render(a Args) error {
 	defer close(done)
 
 	// Start the file walking goroutine
-	paths, errc := walkFiles(done, a.InDir, a.OutDir, a.Ignore)
+	paths, errc := walkFiles(done, a.Fs, a.InDir, a.OutDir, a.Ignore)
 
 	// Start a fixed number of goroutines to render files.
 	c := make(chan error)
@@ -179,7 +178,7 @@ func Render(a Args) error {
 	wg.Add(int(a.RendererCount))
 	for i := 0; i < int(a.RendererCount); i++ {
 		go func() {
-			renderWorker(done, paths, a.SchemaMap, a.InDir, c)
+			renderWorker(done, paths, a.Fs, a.SchemaMap, a.InDir, c)
 			wg.Done()
 		}()
 	}

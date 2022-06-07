@@ -6,8 +6,6 @@ import (
 	"github.com/Azure/azure-sdk-for-go/sdk/storage/azblob"
 )
 
-type PublishFunc func(Args) error
-
 type Args struct {
 	Path          string // Path to directory to publish
 	AccountName   string // Storage account name

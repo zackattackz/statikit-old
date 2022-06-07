@@ -4,14 +4,16 @@ import (
 	"fmt"
 	"os"
 
+	"github.com/spf13/afero"
 	"github.com/zackattackz/azure_static_site_kit/cmd/statikit/runners"
 	"github.com/zackattackz/azure_static_site_kit/cmd/statikit/usage"
-	"github.com/zackattackz/azure_static_site_kit/internal/statikit/initializer"
 	"golang.org/x/term"
 )
 
-func Runner(init initializer.InitStatikitProjectFunc) runners.Runner {
-	return func(args []string, usageFor runners.UsageForFunc) error {
+type initStatikitProjectFunc func(fs afero.Fs, path string, pwd string, key []byte) error
+
+func Runner(init initStatikitProjectFunc) runners.Runner {
+	return func(fs afero.Fs, args []string, usageFor runners.UsageForFunc) error {
 		if len(args) < 3 {
 			usageFor(usage.Init)()
 		}
@@ -42,7 +44,7 @@ func Runner(init initializer.InitStatikitProjectFunc) runners.Runner {
 		}
 		fmt.Println()
 
-		err = initializer.InitStatikitProject(outDir, string(pwd), key)
+		err = init(fs, outDir, string(pwd), key)
 		if err != nil {
 			// Delete outDir if it was made
 			os.RemoveAll(outDir)

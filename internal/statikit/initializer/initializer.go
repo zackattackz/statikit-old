@@ -2,13 +2,11 @@ package initializer
 
 import (
 	"fmt"
-	"os"
 	"path/filepath"
 
+	"github.com/spf13/afero"
 	"github.com/zackattackz/azure_static_site_kit/pkg/secret"
 )
-
-type InitStatikitProjectFunc func(path string, pwd string, key []byte) error
 
 const (
 	StatikitDirName = "_statikit"
@@ -18,30 +16,30 @@ const (
 	DefaultDataName = "_defaultvalues"
 )
 
-func InitStatikitProject(path string, pwd string, key []byte) error {
+func InitStatikitProject(fs afero.Fs, path string, pwd string, key []byte) error {
 
-	_, err := os.Stat(path)
+	_, err := fs.Stat(path)
 	if err == nil {
 		return fmt.Errorf("%s already exists", path)
 	}
 
-	if err = os.Mkdir(path, 0755); err != nil {
+	if err = fs.Mkdir(path, 0755); err != nil {
 		return err
 	}
 
 	path = filepath.Join(path, StatikitDirName)
 
-	if err = os.Mkdir(path, 0755); err != nil {
+	if err = fs.Mkdir(path, 0755); err != nil {
 		return err
 	}
 
-	cfgFile, err := os.Create(filepath.Join(path, ConfigFileName))
+	cfgFile, err := fs.Create(filepath.Join(path, ConfigFileName))
 	if err != nil {
 		return err
 	}
 	defer cfgFile.Close()
 
-	keyFile, err := os.Create(filepath.Join(path, KeyFileName))
+	keyFile, err := fs.Create(filepath.Join(path, KeyFileName))
 	if err != nil {
 		return err
 	}

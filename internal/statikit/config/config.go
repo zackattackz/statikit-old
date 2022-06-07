@@ -3,11 +3,11 @@ package config
 import (
 	"errors"
 	"fmt"
-	"io/fs"
 	"os"
 	"path/filepath"
 
 	"github.com/BurntSushi/toml"
+	"github.com/spf13/afero"
 	"github.com/zackattackz/azure_static_site_kit/internal/statikit/initializer"
 )
 
@@ -54,11 +54,12 @@ type T struct {
 type parser struct {
 	root string
 	path string
+	fs   afero.Fs
 }
 
-func NewParser(root string) (Parser, error) {
-	parser := &parser{root: root}
-	p, err := getPath(root)
+func NewParser(fs afero.Fs, root string) (Parser, error) {
+	parser := &parser{root: root, fs: fs}
+	p, err := getPath(fs, root)
 	if err != nil {
 		return nil, err
 	}
@@ -69,10 +70,10 @@ func NewParser(root string) (Parser, error) {
 /*
 Searches for valid config file in path `root`
 */
-func getPath(root string) (string, error) {
+func getPath(fs afero.Fs, root string) (string, error) {
 	p := filepath.Join(root, initializer.StatikitDirName, initializer.ConfigFileName)
-	s, err := os.Stat(p)
-	if errors.Is(err, fs.ErrNotExist) || !s.Mode().IsRegular() {
+	s, err := fs.Stat(p)
+	if os.IsNotExist(err) || !s.Mode().IsRegular() {
 		return "", NotExistError{path: root}
 	} else if err != nil {
 		return "", err
@@ -81,7 +82,7 @@ func getPath(root string) (string, error) {
 }
 
 func (p *parser) Parse(cfg *T) error {
-	f, err := os.Open(p.path)
+	f, err := p.fs.Open(p.path)
 	if err != nil {
 		return err
 	}

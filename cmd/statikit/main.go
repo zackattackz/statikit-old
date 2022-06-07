@@ -5,6 +5,7 @@ import (
 	"os"
 	"path/filepath"
 
+	"github.com/spf13/afero"
 	"github.com/zackattackz/azure_static_site_kit/cmd/statikit/runners"
 	"github.com/zackattackz/azure_static_site_kit/cmd/statikit/runners/help"
 	"github.com/zackattackz/azure_static_site_kit/cmd/statikit/runners/initialize"
@@ -46,7 +47,7 @@ func runMain(args []string, deps mainDependencies) {
 		}
 	}
 
-	err := deps.modeToRunner[m](os.Args, usageForFunc)
+	err := deps.modeToRunner[m](afero.NewOsFs(), os.Args, usageForFunc)
 	if err != nil {
 		logErrAndExit(err, 1)
 	} else {

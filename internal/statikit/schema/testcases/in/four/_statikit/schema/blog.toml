@@ -1,5 +1,0 @@
-[Data]
-TestOne = "TestOne"
-TestTwo = 2
-[FileSub]
-Head = "templates/head.html"

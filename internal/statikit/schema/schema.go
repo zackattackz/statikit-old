@@ -5,11 +5,11 @@ import (
 	"html/template"
 	"io"
 	"io/fs"
-	"os"
 	"path/filepath"
 	"strings"
 
 	"github.com/BurntSushi/toml"
+	"github.com/spf13/afero"
 	"github.com/zackattackz/azure_static_site_kit/internal/statikit/initializer"
 	sp "github.com/zackattackz/azure_static_site_kit/pkg/subtractPaths"
 )
@@ -42,15 +42,16 @@ func parse(r io.Reader) (d parseT, err error) {
 
 type parser struct {
 	root string
+	fs   afero.Fs
 }
 
-func NewParser(root string) Parser {
-	return &parser{root: root}
+func NewParser(fs afero.Fs, root string) Parser {
+	return &parser{root: root, fs: fs}
 }
 
 func (p *parser) Parse(m *Map) error {
 	dataPath := filepath.Join(p.root, initializer.StatikitDirName, initializer.SchemaDirName)
-	err := filepath.WalkDir(dataPath, func(path string, e fs.DirEntry, err error) error {
+	err := afero.Walk(p.fs, dataPath, func(path string, e fs.FileInfo, err error) error {
 		// Ensure there was no error in call
 		if err != nil {
 			return err
@@ -63,12 +64,12 @@ func (p *parser) Parse(m *Map) error {
 
 		// Skip e if it is dir or non-regular or is not a .toml file
 		if e.IsDir() ||
-			!e.Type().IsRegular() ||
+			!e.Mode().IsRegular() ||
 			ext != ".toml" {
 			return nil
 		}
 
-		f, err := os.Open(path)
+		f, err := p.fs.Open(path)
 		if err != nil {
 			return err
 		}
@@ -85,11 +86,11 @@ func (p *parser) Parse(m *Map) error {
 		// Read all the files in FileSubst and
 		// fill out T's FileSubst with contents
 		for v, fname := range d.FileSub {
-			f, err := os.Open(filepath.Join(p.root, filepath.Clean(fname)))
+			f, err := p.fs.Open(filepath.Join(p.root, filepath.Clean(fname)))
 			if err != nil {
 				return err
 			}
-			b, err := io.ReadAll(f)
+			b, err := afero.ReadAll(f)
 			if err != nil {
 				return err
 			}
