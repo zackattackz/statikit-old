@@ -18,17 +18,13 @@ const (
 	Help    Mode = "help"
 )
 
-func IsMode(m Mode) (exists bool) {
-	modeMap := map[Mode]any{
-		Invalid: nil,
-		Render:  nil,
-		Preview: nil,
-		Publish: nil,
-		Init:    nil,
-		Help:    nil,
+func (m Mode) IsValid() bool {
+	switch m {
+	case Invalid, Render, Preview, Publish, Init, Help:
+		return true
+	default:
+		return false
 	}
-	_, exists = modeMap[m]
-	return
 }
 
 func PrintUsageAndExit(cmdName string, m Mode, modeToPrintDefaults map[Mode]func()) {

@@ -47,8 +47,14 @@ func (e MoreThanOneError) Is(target error) bool {
 	return targetCast.amount == e.amount
 }
 
+type azblobConfig struct {
+	AccountName   string
+	ContainerName string
+}
+
 type T struct {
-	Ignore []string // List of file globs to ignore when rendering
+	Ignore []string     // List of file globs to ignore when rendering
+	Az     azblobConfig // Details of az blob storage
 }
 
 type parser struct {

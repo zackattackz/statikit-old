@@ -37,7 +37,7 @@ func runMain(args []string, deps mainDependencies) {
 
 	m := usage.Mode(os.Args[1])
 
-	if !usage.IsMode(m) {
+	if !m.IsValid() {
 		usage.PrintUsageAndExit(cmdName, usage.Invalid, nil)
 	}
 

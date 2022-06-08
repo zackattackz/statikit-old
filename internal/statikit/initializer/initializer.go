@@ -39,27 +39,10 @@ func InitStatikitProject(fs afero.Fs, path string, pwd string, key []byte) error
 	}
 	defer cfgFile.Close()
 
-	keyFile, err := fs.Create(filepath.Join(path, KeyFileName))
-	if err != nil {
-		return err
-	}
-	defer keyFile.Close()
-
 	aes, err := secret.Encrypt(pwd, key)
 	if err != nil {
 		return err
 	}
 
-	n, err := keyFile.Write(aes)
-	if err != nil {
-		return err
-	}
-	for n < len(aes) {
-		m, err := keyFile.Write(aes[n:])
-		if err != nil {
-			return err
-		}
-		n += m
-	}
-	return nil
+	return afero.WriteFile(fs, filepath.Join(path, KeyFileName), aes, 0755)
 }

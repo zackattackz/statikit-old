@@ -12,7 +12,7 @@ func Runner(_ afero.Fs, args []string, usageFor runners.UsageForFunc) error {
 		usageFor(usage.Help)()
 	}
 	m := args[2]
-	if usage.IsMode(usage.Mode(m)) {
+	if usage.Mode(m).IsValid() {
 		usageFor(usage.Mode(m))()
 	}
 	usageFor(usage.Help)()
