@@ -29,7 +29,6 @@ func init() {
 		outFlag           = "o"
 		forceFlag         = "f"
 		rendererCountFlag = "renderer-count"
-		forFlag           = "for"
 
 		// default flag values
 		defaultForce         = false
