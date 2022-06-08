@@ -9,11 +9,11 @@ import (
 )
 
 const (
-	StatikitDirName = "_statikit"
-	ConfigFileName  = "config.toml"
-	SchemaDirName   = "schema"
-	KeyFileName     = "key.aes256"
-	DefaultDataName = "_defaultvalues"
+	StatikitDirName   = "_statikit"
+	ConfigFileName    = "config.toml"
+	SchemaDirName     = "schema"
+	KeyFileName       = "key.aes256"
+	DefaultValuesName = "_defaultvalues"
 )
 
 func InitStatikitProject(fs afero.Fs, path string, pwd string, key []byte) error {

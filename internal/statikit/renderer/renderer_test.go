@@ -149,7 +149,7 @@ func TestRun(t *testing.T) {
 		},
 		{
 			schema.Map{
-				initializer.DefaultDataName: {
+				initializer.DefaultValuesName: {
 					Data: map[string]any{
 						"Count": int64(123),
 					},
@@ -163,7 +163,7 @@ func TestRun(t *testing.T) {
 		},
 		{
 			schema.Map{
-				initializer.DefaultDataName: {
+				initializer.DefaultValuesName: {
 					Data: map[string]any{
 						"Count": int64(200),
 					},
@@ -183,7 +183,7 @@ func TestRun(t *testing.T) {
 		},
 		{
 			schema.Map{
-				initializer.DefaultDataName: {
+				initializer.DefaultValuesName: {
 					Data: map[string]any{
 						"Title": "Hello",
 						"Date":  "Today",

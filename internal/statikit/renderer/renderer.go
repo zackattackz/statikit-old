@@ -56,7 +56,7 @@ func render(fs afero.Fs, p inOutPath, dataMap schema.Map, baseIn string) error {
 	pathWithoutExt := strings.TrimSuffix(path, filepath.Ext(path))
 	d, ok := dataMap[pathWithoutExt]
 	if !ok {
-		d = dataMap[initializer.DefaultDataName]
+		d = dataMap[initializer.DefaultValuesName]
 	}
 
 	return t.Execute(fOut, d)

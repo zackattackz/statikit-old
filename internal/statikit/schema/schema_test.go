@@ -38,7 +38,7 @@ func TestParse(t *testing.T) {
 			{filepath.Join("templates", "head"), "html", "<head><title>Hello World</title></head>"},
 		},
 		{
-			{initializer.DefaultDataName, "toml", "[Data]\nTitle = \"One\""},
+			{initializer.DefaultValuesName, "toml", "[Data]\nTitle = \"One\""},
 		},
 	}
 
@@ -112,7 +112,7 @@ func TestParse(t *testing.T) {
 			},
 		},
 		{
-			initializer.DefaultDataName: T{
+			initializer.DefaultValuesName: T{
 				Data: map[string]any{
 					"Title": "One",
 				},
