@@ -41,7 +41,7 @@ func PrintUsageAndExit(cmdName string, m Mode, modeToPrintDefaults map[Mode]func
 	case Preview:
 		opts = "[dirname]"
 	case Publish:
-		opts = "[dirname]"
+		opts = "-src dirname [dirname]"
 	case Init:
 		opts = "[dirname]"
 	case Help:

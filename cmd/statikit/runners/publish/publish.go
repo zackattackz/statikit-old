@@ -1,6 +1,7 @@
 package publish
 
 import (
+	"flag"
 	"os"
 	"path/filepath"
 
@@ -13,16 +14,52 @@ import (
 	"github.com/zackattackz/azure_static_site_kit/pkg/secret"
 )
 
+var FlagSet *flag.FlagSet
+
+var inDir, srcDir string
+
+// Initialize FlagSet
+func init() {
+	const (
+		// flags
+		srcFlag = "src"
+
+		// default flag values
+		defaultSrc = ""
+
+		// flag descriptions
+		descSrc = "path to source statikit project"
+	)
+
+	FlagSet = flag.NewFlagSet(string(usage.Publish), flag.ExitOnError)
+
+	FlagSet.StringVar(&srcDir, srcFlag, defaultSrc, descSrc)
+}
+
 type publishFunc func(publisher.Args) error
 
 func Runner(publish publishFunc) runners.Runner {
 	return func(fs afero.Fs, args []string, usageFor runners.UsageForFunc) error {
-		if len(args) < 3 {
+		FlagSet.Usage = usageFor(usage.Publish)
+
+		FlagSet.Parse(args[2:])
+
+		if FlagSet.NArg() > 1 ||
+			srcDir == "" {
 			usageFor(usage.Publish)()
 		}
 
-		inDir := filepath.Clean(args[2])
-		aes, err := os.ReadFile(filepath.Join(inDir, initializer.StatikitDirName, initializer.KeyFileName))
+		// Initialize inDir to (optionally) first non-flag arg
+		inDir = FlagSet.Arg(0)
+		if inDir == "" {
+			inDir = "."
+		}
+
+		// Clean the in/src dirs
+		inDir = filepath.Clean(inDir)
+		srcDir = filepath.Clean(srcDir)
+
+		aes, err := os.ReadFile(filepath.Join(srcDir, initializer.StatikitDirName, initializer.KeyFileName))
 		if err != nil {
 			return err
 		}
@@ -41,7 +78,7 @@ func Runner(publish publishFunc) runners.Runner {
 			return err
 		}
 
-		cfgParser, err := config.NewParser(fs, inDir)
+		cfgParser, err := config.NewParser(fs, srcDir)
 		if err != nil {
 			return err
 		}
