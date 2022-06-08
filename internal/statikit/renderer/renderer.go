@@ -56,11 +56,16 @@ func render(fs afero.Fs, p inOutPath, dataMap schema.Map, baseIn string) error {
 	pathWithoutExt := strings.TrimSuffix(path, filepath.Ext(path))
 	d, ok := dataMap[pathWithoutExt]
 	if !ok {
-		d = dataMap[initializer.DefaultValuesName]
+		d, ok = dataMap[initializer.DefaultValuesName]
+		if !ok {
+			return ErrNoDefaultValues
+		}
 	}
 
 	return t.Execute(fOut, d)
 }
+
+var ErrNoDefaultValues = fmt.Errorf("no default values defined")
 
 // renderWorker reads in/out paths from `paths` and sends result of rendering
 // to `c` until either `paths` or `done` is closed.
@@ -112,9 +117,9 @@ func walkFiles(done <-chan struct{}, walkFs afero.Fs, baseIn, baseOut string, ig
 				return walkFs.Mkdir(fullOut, 0755)
 			}
 
-			// If not a directory or regular, error out
+			// If not a directory or regular, skip
 			if !info.Mode().IsRegular() {
-				return fmt.Errorf("encountered irregular file: %s", fullIn)
+				return nil
 			}
 
 			// Otherwise, check if the file ends in ".gohtml"
@@ -161,7 +166,7 @@ func walkFiles(done <-chan struct{}, walkFs afero.Fs, baseIn, baseOut string, ig
 // which will be rendered as html.
 func Render(a Args) error {
 	if a.RendererCount < 1 {
-		return fmt.Errorf("a.RendererCount must be >= 1")
+		return ErrTooFewRenderers
 	}
 
 	// Render closes the done channel when it returns; it may do so before
@@ -199,3 +204,5 @@ func Render(a Args) error {
 	// Return the result of the walk
 	return <-errc
 }
+
+var ErrTooFewRenderers = fmt.Errorf("a.RendererCount must be >= 1")
