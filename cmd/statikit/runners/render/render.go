@@ -4,7 +4,6 @@ import (
 	"bufio"
 	"flag"
 	"fmt"
-	"io"
 	"os"
 	"path/filepath"
 
@@ -17,28 +16,11 @@ import (
 	"github.com/zackattackz/azure_static_site_kit/internal/statikit/schema"
 )
 
-type renderFor string
-
-const (
-	renderLocal renderFor = renderFor("local")
-	renderAzure renderFor = renderFor("az")
-)
-
-func (r renderFor) IsValid() bool {
-	switch r {
-	case renderLocal, renderAzure:
-		return true
-	default:
-		return false
-	}
-}
-
 var FlagSet *flag.FlagSet
 
 var outDir, inDir string
 var force bool
 var rendererCount uint
-var forString string
 
 // Initialize FlagSet
 func init() {
@@ -52,13 +34,11 @@ func init() {
 		// default flag values
 		defaultForce         = false
 		defaultRendererCount = 20
-		defaultFor           = renderLocal
 
 		// flag descriptions
 		descOut           = "rendered output directory"
 		descForce         = "force output directory removal"
 		descRendererCount = "how many renderer goroutines to be made"
-		descFor           = "determines additional files to output"
 	)
 
 	FlagSet = flag.NewFlagSet(string(usage.Render), flag.ExitOnError)
@@ -67,7 +47,6 @@ func init() {
 	FlagSet.StringVar(&outDir, outFlag, defaultOut, descOut)
 	FlagSet.BoolVar(&force, forceFlag, defaultForce, descForce)
 	FlagSet.UintVar(&rendererCount, rendererCountFlag, defaultRendererCount, descRendererCount)
-	FlagSet.StringVar(&forString, forFlag, string(defaultFor), descFor)
 }
 
 func warnErase(outDir string) error {
@@ -92,11 +71,6 @@ func Runner(render renderFunc) runners.Runner {
 		FlagSet.Parse(args[2:])
 
 		if FlagSet.NArg() > 1 {
-			usageFor(usage.Render)()
-		}
-
-		rFor := renderFor(forString)
-		if !rFor.IsValid() {
 			usageFor(usage.Render)()
 		}
 
@@ -159,35 +133,6 @@ func Runner(render renderFunc) runners.Runner {
 		err = render(rendererArgs)
 		if err != nil {
 			return err
-		}
-
-		switch rFor {
-		case renderLocal:
-		case renderAzure:
-			// Copy over the keyfile, it is needed for when we publish
-			outKeyFilePath := filepath.Join(outDir, initializer.StatikitDirName, initializer.KeyFileName)
-			inKeyFilePath := filepath.Join(inDir, initializer.StatikitDirName, initializer.KeyFileName)
-			err = fs.Mkdir(filepath.Join(outDir, initializer.StatikitDirName), 0755)
-			if err != nil {
-				return err
-			}
-
-			inF, err := fs.Open(inKeyFilePath)
-			if err != nil {
-				return err
-			}
-			defer inF.Close()
-
-			outF, err := fs.Create(outKeyFilePath)
-			if err != nil {
-				return err
-			}
-			defer outF.Close()
-
-			_, err = io.Copy(outF, inF)
-			if err != nil {
-				return err
-			}
 		}
 		return nil
 	}

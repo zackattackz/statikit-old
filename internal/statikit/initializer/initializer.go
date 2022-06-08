@@ -39,6 +39,8 @@ func InitStatikitProject(fs afero.Fs, path string, pwd string, key []byte) error
 	}
 	defer cfgFile.Close()
 
+	fs.Mkdir(filepath.Join(path, SchemaDirName), 0755)
+
 	aes, err := secret.Encrypt(pwd, key)
 	if err != nil {
 		return err
