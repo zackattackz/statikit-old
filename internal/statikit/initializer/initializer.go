@@ -1,7 +1,6 @@
 package initializer
 
 import (
-	"fmt"
 	"path/filepath"
 
 	"github.com/spf13/afero"
@@ -18,18 +17,13 @@ const (
 
 func InitStatikitProject(fs afero.Fs, path string, pwd string, key []byte) error {
 
-	_, err := fs.Stat(path)
-	if err == nil {
-		return fmt.Errorf("%s already exists", path)
-	}
-
-	if err = fs.Mkdir(path, 0755); err != nil {
+	if err := fs.Mkdir(path, 0755); err != nil {
 		return err
 	}
 
 	path = filepath.Join(path, StatikitDirName)
 
-	if err = fs.Mkdir(path, 0755); err != nil {
+	if err := fs.Mkdir(path, 0755); err != nil {
 		return err
 	}
 
