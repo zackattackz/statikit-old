@@ -10,12 +10,10 @@ import (
 	"github.com/zackattackz/azure_static_site_kit/cmd/statikit/runners/help"
 	"github.com/zackattackz/azure_static_site_kit/cmd/statikit/runners/initialize"
 	"github.com/zackattackz/azure_static_site_kit/cmd/statikit/runners/preview"
-	"github.com/zackattackz/azure_static_site_kit/cmd/statikit/runners/publish"
 	"github.com/zackattackz/azure_static_site_kit/cmd/statikit/runners/render"
 	"github.com/zackattackz/azure_static_site_kit/cmd/statikit/usage"
 	"github.com/zackattackz/azure_static_site_kit/internal/statikit/initializer"
 	"github.com/zackattackz/azure_static_site_kit/internal/statikit/previewer"
-	"github.com/zackattackz/azure_static_site_kit/internal/statikit/publisher"
 	"github.com/zackattackz/azure_static_site_kit/internal/statikit/renderer"
 )
 
@@ -60,7 +58,6 @@ func main() {
 		modeToRunner: map[usage.Mode]runners.Runner{
 			usage.Preview: preview.Runner(previewer.Preview),
 			usage.Render:  render.Runner(renderer.Render),
-			usage.Publish: publish.Runner(publisher.Publish),
 			usage.Init:    initialize.Runner(initializer.InitStatikitProject),
 			usage.Help:    help.Runner,
 		},

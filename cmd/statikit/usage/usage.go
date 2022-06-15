@@ -13,14 +13,13 @@ const (
 	Invalid Mode = ""
 	Render  Mode = "render"
 	Preview Mode = "preview"
-	Publish Mode = "publish"
 	Init    Mode = "init"
 	Help    Mode = "help"
 )
 
 func (m Mode) IsValid() bool {
 	switch m {
-	case Invalid, Render, Preview, Publish, Init, Help:
+	case Invalid, Render, Preview, Init, Help:
 		return true
 	default:
 		return false
@@ -32,7 +31,7 @@ func PrintUsageAndExit(cmdName string, m Mode, modeToPrintDefaults map[Mode]func
 	var opts string
 	_, cmdName = filepath.Split(cmdName)
 	usageFmtStr := "usage: %s %s %s"
-	allModes := fmt.Sprintf("[%s | %s | %s | %s | %s]", Render, Preview, Publish, Init, Help)
+	allModes := fmt.Sprintf("[%s | %s | %s | %s]", Render, Preview, Init, Help)
 	allModesButHelp := allModes[:len(allModes)-len(Help)-4] + "]"
 
 	switch m {
@@ -40,8 +39,6 @@ func PrintUsageAndExit(cmdName string, m Mode, modeToPrintDefaults map[Mode]func
 		opts = "[-o dirname] [-renderer-count uint] [-f] [dirname]"
 	case Preview:
 		opts = "[dirname]"
-	case Publish:
-		opts = "-src dirname [dirname]"
 	case Init:
 		opts = "[dirname]"
 	case Help:
