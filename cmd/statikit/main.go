@@ -27,13 +27,13 @@ func logErrAndExit(err error, code int) {
 	os.Exit(code)
 }
 func runMain(args []string, deps mainDependencies) {
-	_, cmdName := filepath.Split(os.Args[0])
+	_, cmdName := filepath.Split(args[0])
 
-	if len(os.Args) < 2 {
+	if len(args) < 2 {
 		usage.PrintUsageAndExit(cmdName, usage.Invalid, nil)
 	}
 
-	m := usage.Mode(os.Args[1])
+	m := usage.Mode(args[1])
 
 	if !m.IsValid() {
 		usage.PrintUsageAndExit(cmdName, usage.Invalid, nil)
@@ -45,7 +45,7 @@ func runMain(args []string, deps mainDependencies) {
 		}
 	}
 
-	err := deps.modeToRunner[m](afero.NewOsFs(), os.Args, usageForFunc)
+	err := deps.modeToRunner[m](afero.NewOsFs(), args, usageForFunc)
 	if err != nil {
 		logErrAndExit(err, 1)
 	} else {
