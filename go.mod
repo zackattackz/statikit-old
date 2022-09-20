@@ -1,4 +1,4 @@
-module github.com/zackattackz/azure_static_site_kit
+module codeberg.org/zackattackz/statikit
 
 go 1.18
 

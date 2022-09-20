@@ -4,8 +4,8 @@ import (
 	"path/filepath"
 
 	"github.com/spf13/afero"
-	"github.com/zackattackz/azure_static_site_kit/cmd/statikit/runners"
-	"github.com/zackattackz/azure_static_site_kit/cmd/statikit/usage"
+	"codeberg.org/zackattackz/statikit/cmd/statikit/runners"
+	"codeberg.org/zackattackz/statikit/cmd/statikit/usage"
 )
 
 type previewFunc func(fs afero.Fs, path string, port string) error

@@ -6,15 +6,15 @@ import (
 	"path/filepath"
 
 	"github.com/spf13/afero"
-	"github.com/zackattackz/azure_static_site_kit/cmd/statikit/runners"
-	"github.com/zackattackz/azure_static_site_kit/cmd/statikit/runners/help"
-	"github.com/zackattackz/azure_static_site_kit/cmd/statikit/runners/initialize"
-	"github.com/zackattackz/azure_static_site_kit/cmd/statikit/runners/preview"
-	"github.com/zackattackz/azure_static_site_kit/cmd/statikit/runners/render"
-	"github.com/zackattackz/azure_static_site_kit/cmd/statikit/usage"
-	"github.com/zackattackz/azure_static_site_kit/internal/statikit/initializer"
-	"github.com/zackattackz/azure_static_site_kit/internal/statikit/previewer"
-	"github.com/zackattackz/azure_static_site_kit/internal/statikit/renderer"
+	"codeberg.org/zackattackz/statikit/cmd/statikit/runners"
+	"codeberg.org/zackattackz/statikit/cmd/statikit/runners/help"
+	"codeberg.org/zackattackz/statikit/cmd/statikit/runners/initialize"
+	"codeberg.org/zackattackz/statikit/cmd/statikit/runners/preview"
+	"codeberg.org/zackattackz/statikit/cmd/statikit/runners/render"
+	"codeberg.org/zackattackz/statikit/cmd/statikit/usage"
+	"codeberg.org/zackattackz/statikit/internal/statikit/initializer"
+	"codeberg.org/zackattackz/statikit/internal/statikit/previewer"
+	"codeberg.org/zackattackz/statikit/internal/statikit/renderer"
 )
 
 type mainDependencies struct {

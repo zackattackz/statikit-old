@@ -9,9 +9,9 @@ import (
 	"testing"
 
 	"github.com/spf13/afero"
-	"github.com/zackattackz/azure_static_site_kit/internal/statikit/initializer"
-	"github.com/zackattackz/azure_static_site_kit/internal/statikit/schema"
-	sp "github.com/zackattackz/azure_static_site_kit/pkg/subtractPaths"
+	"codeberg.org/zackattackz/statikit/internal/statikit/initializer"
+	"codeberg.org/zackattackz/statikit/internal/statikit/schema"
+	sp "codeberg.org/zackattackz/statikit/pkg/subtractPaths"
 )
 
 type notEqualErr struct {
