@@ -13,9 +13,9 @@ import (
 	"sync"
 
 	"github.com/spf13/afero"
-	"codeberg.org/zackattackz/statikit/internal/statikit/initializer"
-	"codeberg.org/zackattackz/statikit/internal/statikit/schema"
-	sp "codeberg.org/zackattackz/statikit/pkg/subtractPaths"
+	"github.com/zackattackz/statikit-old/internal/statikit/initializer"
+	"github.com/zackattackz/statikit-old/internal/statikit/schema"
+	sp "github.com/zackattackz/statikit-old/pkg/subtractPaths"
 )
 
 // Arguments to statikit.Render

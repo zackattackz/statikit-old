@@ -7,7 +7,7 @@ import (
 	"testing"
 
 	"github.com/spf13/afero"
-	"codeberg.org/zackattackz/statikit/internal/statikit/initializer"
+	"github.com/zackattackz/statikit-old/internal/statikit/initializer"
 )
 
 func testParse(t *testing.T, testInputs []string, expectedResults []T) {

@@ -8,12 +8,12 @@ import (
 	"path/filepath"
 
 	"github.com/spf13/afero"
-	"codeberg.org/zackattackz/statikit/cmd/statikit/runners"
-	"codeberg.org/zackattackz/statikit/cmd/statikit/usage"
-	"codeberg.org/zackattackz/statikit/internal/statikit/config"
-	"codeberg.org/zackattackz/statikit/internal/statikit/initializer"
-	"codeberg.org/zackattackz/statikit/internal/statikit/renderer"
-	"codeberg.org/zackattackz/statikit/internal/statikit/schema"
+	"github.com/zackattackz/statikit-old/cmd/statikit/runners"
+	"github.com/zackattackz/statikit-old/cmd/statikit/usage"
+	"github.com/zackattackz/statikit-old/internal/statikit/config"
+	"github.com/zackattackz/statikit-old/internal/statikit/initializer"
+	"github.com/zackattackz/statikit-old/internal/statikit/renderer"
+	"github.com/zackattackz/statikit-old/internal/statikit/schema"
 )
 
 var FlagSet *flag.FlagSet

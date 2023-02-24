@@ -2,7 +2,7 @@ package runners
 
 import (
 	"github.com/spf13/afero"
-	"codeberg.org/zackattackz/statikit/cmd/statikit/usage"
+	"github.com/zackattackz/statikit-old/cmd/statikit/usage"
 )
 
 type UsageForFunc func(usage.Mode) func()

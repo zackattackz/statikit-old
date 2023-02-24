@@ -6,15 +6,15 @@ import (
 	"path/filepath"
 
 	"github.com/spf13/afero"
-	"codeberg.org/zackattackz/statikit/cmd/statikit/runners"
-	"codeberg.org/zackattackz/statikit/cmd/statikit/runners/help"
-	"codeberg.org/zackattackz/statikit/cmd/statikit/runners/initialize"
-	"codeberg.org/zackattackz/statikit/cmd/statikit/runners/preview"
-	"codeberg.org/zackattackz/statikit/cmd/statikit/runners/render"
-	"codeberg.org/zackattackz/statikit/cmd/statikit/usage"
-	"codeberg.org/zackattackz/statikit/internal/statikit/initializer"
-	"codeberg.org/zackattackz/statikit/internal/statikit/previewer"
-	"codeberg.org/zackattackz/statikit/internal/statikit/renderer"
+	"github.com/zackattackz/statikit-old/cmd/statikit/runners"
+	"github.com/zackattackz/statikit-old/cmd/statikit/runners/help"
+	"github.com/zackattackz/statikit-old/cmd/statikit/runners/initialize"
+	"github.com/zackattackz/statikit-old/cmd/statikit/runners/preview"
+	"github.com/zackattackz/statikit-old/cmd/statikit/runners/render"
+	"github.com/zackattackz/statikit-old/cmd/statikit/usage"
+	"github.com/zackattackz/statikit-old/internal/statikit/initializer"
+	"github.com/zackattackz/statikit-old/internal/statikit/previewer"
+	"github.com/zackattackz/statikit-old/internal/statikit/renderer"
 )
 
 type mainDependencies struct {

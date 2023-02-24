@@ -10,8 +10,8 @@ import (
 
 	"github.com/BurntSushi/toml"
 	"github.com/spf13/afero"
-	"codeberg.org/zackattackz/statikit/internal/statikit/initializer"
-	sp "codeberg.org/zackattackz/statikit/pkg/subtractPaths"
+	"github.com/zackattackz/statikit-old/internal/statikit/initializer"
+	sp "github.com/zackattackz/statikit-old/pkg/subtractPaths"
 )
 
 type Parser interface {

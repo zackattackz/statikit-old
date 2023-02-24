@@ -8,7 +8,7 @@ import (
 
 	"github.com/BurntSushi/toml"
 	"github.com/spf13/afero"
-	"codeberg.org/zackattackz/statikit/internal/statikit/initializer"
+	"github.com/zackattackz/statikit-old/internal/statikit/initializer"
 )
 
 type Parser interface {

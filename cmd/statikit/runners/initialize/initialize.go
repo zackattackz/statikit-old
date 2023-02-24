@@ -4,8 +4,8 @@ import (
 	"os"
 
 	"github.com/spf13/afero"
-	"codeberg.org/zackattackz/statikit/cmd/statikit/runners"
-	"codeberg.org/zackattackz/statikit/cmd/statikit/usage"
+	"github.com/zackattackz/statikit-old/cmd/statikit/runners"
+	"github.com/zackattackz/statikit-old/cmd/statikit/usage"
 )
 
 type initStatikitProjectFunc func(fs afero.Fs, path string) error

@@ -2,8 +2,8 @@ package help
 
 import (
 	"github.com/spf13/afero"
-	"codeberg.org/zackattackz/statikit/cmd/statikit/runners"
-	"codeberg.org/zackattackz/statikit/cmd/statikit/usage"
+	"github.com/zackattackz/statikit-old/cmd/statikit/runners"
+	"github.com/zackattackz/statikit-old/cmd/statikit/usage"
 )
 
 func Runner(_ afero.Fs, args []string, usageFor runners.UsageForFunc) error {

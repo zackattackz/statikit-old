@@ -1,4 +1,4 @@
-module codeberg.org/zackattackz/statikit
+module github.com/zackattackz/statikit-old
 
 go 1.18
 
